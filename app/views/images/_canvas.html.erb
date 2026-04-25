@@ -1,0 +1,22 @@
+<h4><%= @image.title =%></h4>
+<div id="image" data-id="<%= @image.id =%>"></div>
+<div id="canvasTools">
+	<a href="#">✏️</a>
+	<a href="#">🧼</a>
+</div>
+<!--
+canvas flow:
+ - generate command
+ - apply locally
+ - send to websocket, broadcast to others
+-->
+<canvas id="imageCanvas" width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+
+<!-- TODO: move out-of-line -->
+<script>
+const canvas = document.getElementById('imageCanvas');
+let lastX, lastY;
+canvas.addEventListener("mousedown", e => console.log("mousedown", e));
+canvas.addEventListener("mouseup", e => console.log("mouseup", e));
+canvas.addEventListener("mouseout", e => console.log("mouseout", e));
+</script>
