@@ -10,13 +10,11 @@ class ImageChannel < ApplicationCable::Channel
 
   def pos(data)
     # TODO: avoid self-broadcasting if possible, or at least ignore clientside
-    # (ideally identify by connection not user so multiple conns from same user still broadcast fine)
-    # TODO: include some sort of conn id in data as well,
-    # right now we can't distinguish multiple user connections from the client either
-    ImageChannel.broadcast_to(@image, data.merge({user_id: current_user.id}))
+    ImageChannel.broadcast_to(@image, data.merge({user_id: connection.connection_identifier()}))
   end
 
   def poshide(data)
-    ImageChannel.broadcast_to(@image, data.merge({user_id: current_user.id}))
+    # TODO: avoid self-broadcasting if possible, or at least ignore clientside
+    ImageChannel.broadcast_to(@image, data.merge({user_id: connection.connection_identifier()}))
   end
 end
