@@ -17,12 +17,19 @@ class CanvasRelay {
     };
   }
 
+  #onMouseOut() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return () => this.perform("poshide");
+  }
+
   install(canvas) {
     canvas.addEventListener("mousemove", this.#onMouseMove());
+    canvas.addEventListener("mouseout", this.#onMouseOut());
   }
 
   uninstall(canvas) {
     canvas.removeEventListener("mousemove", this.#onMouseMove());
+    canvas.removeEventListener("mouseout", this.#onMouseOut());
   }
 }
 
@@ -46,6 +53,11 @@ class UserCursorManager {
     // left/top can't be referenced by attr(data-*) so we assign styles directly
     cur.style.left = r.left + x + "px";
     cur.style.top = r.top + y + "px";
+  }
+
+  hide(uid) {
+    this.cursors[uid]?.remove();
+    delete this.cursors[uid];
   }
 }
 
@@ -81,6 +93,9 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     switch(data.action) {
     case "pos":
       this.userCursors.show(data.user_id, data.x, data.y);
+      break;
+    case "poshide":
+      this.userCursors.hide(data.user_id);
       break;
     }
   },

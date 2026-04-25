@@ -15,4 +15,8 @@ class ImageChannel < ApplicationCable::Channel
     # right now we can't distinguish multiple user connections from the client either
     ImageChannel.broadcast_to(@image, data.merge({user_id: current_user.id}))
   end
+
+  def poshide(data)
+    ImageChannel.broadcast_to(@image, data.merge({user_id: current_user.id}))
+  end
 end
