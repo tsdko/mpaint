@@ -51,8 +51,8 @@ class UserCursorManager {
     const cur = this.cursors[uid];
     const r = canvas.getBoundingClientRect();
     // left/top can't be referenced by attr(data-*) so we assign styles directly
-    cur.style.left = r.left + x + "px";
-    cur.style.top = r.top + y + "px";
+    cur.style.left = window.scrollX + r.left + x + "px";
+    cur.style.top = window.scrollY + r.top + y + "px";
   }
 
   hide(uid) {
