@@ -13,9 +13,23 @@ canvas flow:
 <canvas id="imageCanvas" width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 
 <!-- TODO: move out-of-line -->
+<style>
+.userCursor::after {
+	content: attr(data-user-id);
+	position: relative;
+	top: -1em;
+	pointer-events: none;
+	font-size: initial;
+}
+.userCursor {
+	position: absolute;
+	pointer-events: none;
+	font-size: 2em;
+}
+</style>
+
 <script>
 const canvas = document.getElementById('imageCanvas');
-let lastX, lastY;
 canvas.addEventListener("mousedown", e => console.log("mousedown", e));
 canvas.addEventListener("mouseup", e => console.log("mouseup", e));
 canvas.addEventListener("mouseout", e => console.log("mouseout", e));

@@ -3,7 +3,6 @@ import consumer from "channels/consumer";
 class CanvasRelay {
   constructor(perform) {
     this.perform = perform;
-    this.canvases = new Set();
   }
 
   #onMouseMove() {
@@ -27,10 +26,34 @@ class CanvasRelay {
   }
 }
 
-consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementById("image").dataset.id}, {
+class UserCursorManager {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.cursors = {};
+  }
 
+  show(uid, x, y) {
+    if(!this.cursors[uid]) {
+      const cur = document.createElement("div");
+      cur.dataset.userId = uid;
+      cur.classList.add("userCursor");
+      cur.textContent = "↖";
+      document.body.appendChild(cur);
+      this.cursors[uid] = cur;
+    }
+    const cur = this.cursors[uid];
+    const r = canvas.getBoundingClientRect();
+    // left/top can't be referenced by attr(data-*) so we assign styles directly
+    cur.style.left = r.left + x + "px";
+    cur.style.top = r.top + y + "px";
+  }
+}
+
+consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementById("image").dataset.id}, {
   initialized() {
     this.relay = new CanvasRelay((action, params) => this.perform(action, params));
+    this.canvas = document.getElementById("imageCanvas");
+    this.userCursors = new UserCursorManager(this.canvas);
   },
 
   connected() {
@@ -46,16 +69,19 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
   },
 
   install() {
-    const canvas = document.getElementById("imageCanvas");
-    this.relay.install(canvas);
+    this.relay.install(this.canvas);
   },
 
   uninstall() {
-    const canvas = document.getElementById("imageCanvas");
-    this.relay.uninstall(canvas);
+    this.relay.uninstall(this.canvas);
   },
 
   received(data) {
     console.log("got", data);
+    switch(data.action) {
+    case "pos":
+      this.userCursors.show(data.user_id, data.x, data.y);
+      break;
+    }
   },
 });
