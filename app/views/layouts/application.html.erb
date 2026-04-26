@@ -18,6 +18,8 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
+    <%# XXX action cable doesn't respect relative_url_root by default %>
+    <meta name="action-cable-url" content="<%= Rails.application.config.relative_url_root %>/cable" />
     <%# Includes all stylesheet files in app/assets/stylesheets %>
     <%= stylesheet_link_tag :app, "data-turbo-track": "reload" %>
     <%= javascript_importmap_tags %>
