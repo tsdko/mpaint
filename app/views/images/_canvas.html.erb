@@ -12,7 +12,7 @@
 			<%# <a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">🧼</a> %>
 			<input id="colorPicker" type="color" class="block rounded-md" />
 			<div class="relative openableContainer">
-				<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block"></canvas></a>
+				<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
 				<div class="openable hidden block bg-gray-300 p-2 rounded-md absolute z-1"><input id="brushSize" min="1" max="100" type="range" /></div>
 			</div>
 		</div>
@@ -42,6 +42,13 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 
 <% unless readonly %>
 	<script>
+	{
+		const bscContainer = document.getElementById("brushSizeButton");
+		const bsc = document.getElementById("brushSizeCanvas");
+		bsc.width = bscContainer.clientWidth;
+		bsc.height = bscContainer.clientHeight;
+	}
+
 	document.querySelectorAll(".openableContainer").forEach(el => {
 		const openable = el.querySelector(".openable");
 		const toggle = el.querySelector(".openableToggle");
