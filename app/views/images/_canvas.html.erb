@@ -73,12 +73,14 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 	document.getElementById("brushSize").addEventListener("input", e => {
 		const canvas = brushSizeCanvas;
 		const ctx = canvas.getContext("2d");
+		ctx.filter = "var(--no-antialias-filter)";
 		ctx.lineWidth = e.target.value;
+		ctx.lineCap = "round";
 		ctx.strokeStyle = "black";
 		ctx.beginPath();
 		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.moveTo(0, 0);
-		ctx.lineTo(canvas.width, canvas.height);
+		ctx.moveTo(8, 8);
+		ctx.lineTo(canvas.width - 8, canvas.height - 8);
 		ctx.stroke();
 	});
 	</script>
