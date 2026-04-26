@@ -27,7 +27,10 @@ class CanvasRelay {
             x: e.clientX - r.left,
             y: e.clientY - r.top,
           };
-          this.perform("line", {p1: p1, p2: p2});
+          const line = {p1: p1, p2: p2};
+          if(canvas.dataset.tool === "eraser")
+            line.eraser = true;
+          this.perform("line", line);
         }
         this.lastClientDown = {x: e.clientX, y: e.clientY};
       } else {
@@ -191,6 +194,10 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";
       ctx.filter = brush.antialias ? "none" : "var(--no-antialias-filter)";
+      ctx.globalCompositeOperation = data.eraser ? "destination-out" : "source-over";
+      if(data.eraser) {
+        ctx.strokeStyle = "black";
+      }
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
       ctx.lineTo(data.p2.x, data.p2.y);

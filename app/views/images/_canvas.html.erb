@@ -8,8 +8,16 @@
 		</div>
 	<% else %>
 		<div id="canvasTools" class="mr-2">
-			<a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">✏️</a>
-			<%# <a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">🧼</a> %>
+			<fieldgroup>
+				<label class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-gray-500">
+					<input class="hidden" name="tool" type="radio" value="brush" checked />
+					✏️
+				</label>
+				<label class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-gray-500">
+					<input class="hidden" name="tool" type="radio" value="eraser" />
+					🧼
+				</label>
+			</fieldgroup>
 			<input id="colorPicker" type="color" class="block rounded-md" />
 			<div class="relative openableContainer">
 				<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
@@ -127,5 +135,8 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 		drawBrushSample(brushSizeCanvas, {filter: el.value === "true" ? "none" : "var(--no-antialias-filter)"});
 	}));
 	drawBrushSample(brushSizeCanvas, brushSampleDefaults);
+	document.querySelectorAll("input[name=tool]").forEach(el => el.addEventListener("input", ev => {
+		document.getElementById("imageCanvas").dataset.tool = ev.target.value;
+	}));
 	</script>
 <% end %>
