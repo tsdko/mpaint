@@ -1,4 +1,7 @@
 :root {
 	/* https://stackoverflow.com/questions/195262/can-i-turn-off-antialiasing-on-an-html-canvas-element/68372384#comment130069699_68372384 */
 	--no-antialias-filter: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg"><filter id="f" color-interpolation-filters="sRGB"><feComponentTransfer><feFuncA type="discrete" tableValues="0 1"/></feComponentTransfer></filter></svg>#f');
+
+	/* 7x7 white crosshair */
+	--white-cross-7: url('data:image/gif;base64,R0lGODlhBwAHAPABAAAAAP///yH5BAEAAAAAIf8LSW1hZ2VNYWdpY2sNZ2FtbWE9MC40NTQ1NQAsAAAAAAcABwAAAgyEYwmomwEjc22+VAAAOw==');
 }
