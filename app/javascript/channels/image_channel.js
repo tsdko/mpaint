@@ -168,6 +168,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       const ctx = this.canvas.getContext("2d");
       ctx.strokeStyle = this.userColors[data.user_id] ?? "black";
       ctx.lineWidth = this.userWidths[data.user_id] ?? 1;
+      ctx.lineCap = "round";
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
       ctx.lineTo(data.p2.x, data.p2.y);
