@@ -104,8 +104,9 @@ class UserCursorManager {
 
 consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementById("image").dataset.id}, {
   initialized() {
-    this.relay = new CanvasRelay((action, params) => this.perform(action, params));
     this.canvas = document.getElementById("imageCanvas");
+    if(!this.canvas.dataset.readonly)
+      this.relay = new CanvasRelay((action, params) => this.perform(action, params));
     this.userCursors = new UserCursorManager(this.canvas);
     this.userColors = {};
     this.userWidths = {};
@@ -124,7 +125,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
   },
 
   install() {
-    this.relay.install({
+    this.relay?.install({
       canvas: this.canvas,
       picker: document.querySelector("#colorPicker"),
       sizeInput: document.querySelector("#brushSize"),
@@ -132,7 +133,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
   },
 
   uninstall() {
-    this.relay.uninstall({
+    this.relay?.uninstall({
       canvas: this.canvas,
       picker: document.querySelector("#colorPicker"),
       sizeInput: document.querySelector("#brushSize"),

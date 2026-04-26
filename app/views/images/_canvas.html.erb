@@ -1,16 +1,23 @@
+<%# locals: (readonly: false) %>
+
 <div class="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr]">
 	<div id="image" data-id="<%= @image.id =%>"></div>
 	<h4 class="text-2xl col-start-2"><%= @image.title =%></h4>
-	<div id="canvasTools" class="mr-2">
-		<a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">✏️</a>
-		<%# <a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">🧼</a> %>
-		<input id="colorPicker" type="color" class="block rounded-md" />
-		<div class="relative openableContainer">
-			<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block"></canvas></a>
-			<div class="openable hidden block bg-gray-300 p-2 rounded-md absolute z-1"><input id="brushSize" min="1" max="100" type="range" /></div>
+	<% if readonly %>
+		<div class="mr-2">
 		</div>
-	</div>
-	<canvas class="bg-gray-100" id="imageCanvas" width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+	<% else %>
+		<div id="canvasTools" class="mr-2">
+			<a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">✏️</a>
+			<%# <a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">🧼</a> %>
+			<input id="colorPicker" type="color" class="block rounded-md" />
+			<div class="relative openableContainer">
+				<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block"></canvas></a>
+				<div class="openable hidden block bg-gray-300 p-2 rounded-md absolute z-1"><input id="brushSize" min="1" max="100" type="range" /></div>
+			</div>
+		</div>
+	<% end %>
+	<canvas class="bg-gray-100" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 </div>
 
 <!-- TODO: move out-of-line -->
@@ -29,44 +36,46 @@
 }
 </style>
 
-<script>
-document.querySelectorAll(".openableContainer").forEach(el => {
-	const openable = el.querySelector(".openable");
-	const toggle = el.querySelector(".openableToggle");
-	if(!openable || !toggle)
-		return;
-
-	const closeListener = ev => {
-		console.log(ev.target, openable.contains(ev.target));
-		if(openable.contains(ev.target))
+<% unless readonly %>
+	<script>
+	document.querySelectorAll(".openableContainer").forEach(el => {
+		const openable = el.querySelector(".openable");
+		const toggle = el.querySelector(".openableToggle");
+		if(!openable || !toggle)
 			return;
-		openable.classList.add("hidden");
-		removeCloseListener();
-	};
 
-	const removeCloseListener = () => document.removeEventListener("click", closeListener);
-	toggle.addEventListener("click", () => {
-		if(openable.classList.contains("hidden")) {
-			openable.classList.remove("hidden");
-			window.setTimeout(() => document.addEventListener("click", closeListener), 0);
-		} else {
-			
-		}
+		const closeListener = ev => {
+			console.log(ev.target, openable.contains(ev.target));
+			if(openable.contains(ev.target))
+				return;
+			openable.classList.add("hidden");
+			removeCloseListener();
+		};
+
+		const removeCloseListener = () => document.removeEventListener("click", closeListener);
+		toggle.addEventListener("click", () => {
+			if(openable.classList.contains("hidden")) {
+				openable.classList.remove("hidden");
+				window.setTimeout(() => document.addEventListener("click", closeListener), 0);
+			} else {
+				
+			}
+		});
 	});
-});
 
-const canvas = document.getElementById('imageCanvas');
-canvas.addEventListener("mousedown", e => console.log("mousedown", e));
-canvas.addEventListener("mouseup", e => console.log("mouseup", e));
-document.getElementById("brushSize").addEventListener("input", e => {
-	const canvas = brushSizeCanvas;
-	const ctx = canvas.getContext("2d");
-	ctx.lineWidth = e.target.value;
-	ctx.strokeStyle = "black";
-	ctx.beginPath();
-	ctx.clearRect(0, 0, canvas.width, canvas.height);
-	ctx.moveTo(0, 0);
-	ctx.lineTo(canvas.width, canvas.height);
-	ctx.stroke();
-});
-</script>
+	const canvas = document.getElementById('imageCanvas');
+	canvas.addEventListener("mousedown", e => console.log("mousedown", e));
+	canvas.addEventListener("mouseup", e => console.log("mouseup", e));
+	document.getElementById("brushSize").addEventListener("input", e => {
+		const canvas = brushSizeCanvas;
+		const ctx = canvas.getContext("2d");
+		ctx.lineWidth = e.target.value;
+		ctx.strokeStyle = "black";
+		ctx.beginPath();
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ctx.moveTo(0, 0);
+		ctx.lineTo(canvas.width, canvas.height);
+		ctx.stroke();
+	});
+	</script>
+<% end %>
