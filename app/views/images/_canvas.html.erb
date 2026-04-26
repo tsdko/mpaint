@@ -37,11 +37,15 @@
 			</div>
 		</div>
 	<% end %>
-	<canvas class="bg-gray-100" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+	<canvas class="bg-checkerboard" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 </div>
 
 <!-- TODO: move out-of-line -->
 <style>
+.bg-checkerboard {
+	background: repeating-conic-gradient(var(--color-gray-200) 0 25%, white 0 50%) 50% / 32px 32px;
+}
+
 .userCursor::after {
 	content: attr(data-user-id);
 	position: relative;
