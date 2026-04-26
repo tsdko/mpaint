@@ -3,16 +3,36 @@ import consumer from "channels/consumer";
 class CanvasRelay {
   constructor(perform) {
     this.perform = perform;
+
+    this.lastClientDown = null;
   }
 
   #onMouseMove() {
     let lastClientX, lastClientY;
+    let lastDownClientX = null, lastDownClientY = null;
     return e => {
       if(lastClientX == e.clientX && lastClientY == e.clientY)
         return;
       lastClientX = e.clientX;
       lastClientY = e.clientY;
       const r = canvas.getBoundingClientRect();
+      if(e.buttons & 1) {
+        console.log("clicked while moving", this.lastClientDown, e);
+        if(this.lastClientDown !== null) {
+          const p1 = {
+            x: this.lastClientDown.x - r.left,
+            y: this.lastClientDown.y - r.top,
+          };
+          const p2 = {
+            x: e.clientX - r.left,
+            y: e.clientY - r.top,
+          };
+          this.perform("line", {p1: p1, p2: p2});
+        }
+        this.lastClientDown = {x: e.clientX, y: e.clientY};
+      } else {
+        this.lastClientDown = null;
+      }
       this.perform("pos", {x: e.clientX - r.left, y: e.clientY - r.top});
     };
   }
@@ -66,6 +86,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     this.relay = new CanvasRelay((action, params) => this.perform(action, params));
     this.canvas = document.getElementById("imageCanvas");
     this.userCursors = new UserCursorManager(this.canvas);
+    this.userColors = {}; // TODO implement color changes
   },
 
   connected() {
@@ -96,6 +117,14 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       break;
     case "poshide":
       this.userCursors.hide(data.user_id);
+      break;
+    case "line":
+      const ctx = canvas.getContext("2d");
+      // TODO: make sure user colors are trustable, either structured tuples or a single integer (not a direct string)
+      ctx.strokeStyle = this.userColors[data.user_id] || "black";
+      ctx.moveTo(data.p1.x, data.p1.y);
+      ctx.lineTo(data.p2.x, data.p2.y);
+      ctx.stroke();
       break;
     }
   },

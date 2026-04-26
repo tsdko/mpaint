@@ -17,4 +17,9 @@ class ImageChannel < ApplicationCable::Channel
     # TODO: avoid self-broadcasting if possible, or at least ignore clientside
     ImageChannel.broadcast_to(@image, data.merge({user_id: connection.connection_identifier()}))
   end
+
+  def line(data)
+    # TODO: avoid self-broadcasting if possible, or at least ignore clientside
+    ImageChannel.broadcast_to(@image, data.merge({user_id: connection.connection_identifier()}))
+  end
 end
