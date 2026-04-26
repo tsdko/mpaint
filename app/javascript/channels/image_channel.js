@@ -37,19 +37,33 @@ class CanvasRelay {
     };
   }
 
+  #onColorChange() {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const ctx = canvas.getContext("2d");
+    return ev => {
+      ctx.fillStyle = ev.target.value;
+      ctx.fillRect(0, 0, 1, 1);
+      const rgba = [...ctx.getImageData(0, 0, 1, 1).data];
+      this.perform("color", {r: rgba[0], g: rgba[1], b: rgba[2]});
+    };
+  }
+
   #onMouseOut() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return () => this.perform("poshide");
   }
 
-  install(canvas) {
-    canvas.addEventListener("mousemove", this.#onMouseMove());
-    canvas.addEventListener("mouseout", this.#onMouseOut());
+  install(controls) {
+    controls.canvas.addEventListener("mousemove", this.#onMouseMove());
+    controls.canvas.addEventListener("mouseout", this.#onMouseOut());
+    controls.picker.addEventListener("change", this.#onColorChange());
   }
 
-  uninstall(canvas) {
-    canvas.removeEventListener("mousemove", this.#onMouseMove());
-    canvas.removeEventListener("mouseout", this.#onMouseOut());
+  uninstall(controls) {
+    controls.canvas.removeEventListener("mousemove", this.#onMouseMove());
+    controls.canvas.removeEventListener("mouseout", this.#onMouseOut());
+    controls.picker.removeEventListener("change", this.#onColorChange());
   }
 }
 
@@ -86,7 +100,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     this.relay = new CanvasRelay((action, params) => this.perform(action, params));
     this.canvas = document.getElementById("imageCanvas");
     this.userCursors = new UserCursorManager(this.canvas);
-    this.userColors = {}; // TODO implement color changes
+    this.userColors = {};
   },
 
   connected() {
@@ -102,11 +116,11 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
   },
 
   install() {
-    this.relay.install(this.canvas);
+    this.relay.install({canvas: this.canvas, picker: document.querySelector("#colorPicker")});
   },
 
   uninstall() {
-    this.relay.uninstall(this.canvas);
+    this.relay.uninstall({canvas: this.canvas, picker: document.querySelector("#colorPicker")});
   },
 
   received(data) {
@@ -118,10 +132,17 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     case "poshide":
       this.userCursors.hide(data.user_id);
       break;
+    case "color":
+      for(const comp of "rgb") {
+        if(!Number.isInteger(data[comp]) || data[comp] < 0 || data[comp] > 0xff)
+          return;
+      }
+      this.userColors[data.user_id] = `rgb(${data.r}, ${data.g}, ${data.b})`;
+      break;
     case "line":
-      const ctx = canvas.getContext("2d");
-      // TODO: make sure user colors are trustable, either structured tuples or a single integer (not a direct string)
+      const ctx = this.canvas.getContext("2d");
       ctx.strokeStyle = this.userColors[data.user_id] || "black";
+      ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
       ctx.lineTo(data.p2.x, data.p2.y);
       ctx.stroke();
