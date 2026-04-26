@@ -5,6 +5,10 @@
 		<a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">✏️</a>
 		<%# <a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">🧼</a> %>
 		<input id="colorPicker" type="color" class="block rounded-md" />
+		<div class="relative">
+			<a href="#" id="brushSizeButton" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block"></canvas></a>
+			<div class="block bg-gray-300 p-2 rounded-md absolute z-1"><input id="brushSize" min="1" max="100" type="range" /></div>
+		</div>
 	</div>
 	<canvas class="bg-gray-100" id="imageCanvas" width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 </div>
@@ -29,4 +33,15 @@
 const canvas = document.getElementById('imageCanvas');
 canvas.addEventListener("mousedown", e => console.log("mousedown", e));
 canvas.addEventListener("mouseup", e => console.log("mouseup", e));
+document.getElementById("brushSize").addEventListener("input", e => {
+	const canvas = brushSizeCanvas;
+	const ctx = canvas.getContext("2d");
+	ctx.lineWidth = e.target.value;
+	ctx.strokeStyle = "black";
+	ctx.beginPath();
+	ctx.clearRect(0, 0, canvas.width, canvas.height);
+	ctx.moveTo(0, 0);
+	ctx.lineTo(canvas.width, canvas.height);
+	ctx.stroke();
+});
 </script>

@@ -37,6 +37,11 @@ class CanvasRelay {
     };
   }
 
+  #onSizeChange() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => this.perform("size", {size: Number.parseFloat(ev.target.value)});
+  }
+
   #onColorChange() {
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 1;
@@ -58,12 +63,14 @@ class CanvasRelay {
     controls.canvas.addEventListener("mousemove", this.#onMouseMove());
     controls.canvas.addEventListener("mouseout", this.#onMouseOut());
     controls.picker.addEventListener("change", this.#onColorChange());
+    controls.sizeInput.addEventListener("change", this.#onSizeChange());
   }
 
   uninstall(controls) {
     controls.canvas.removeEventListener("mousemove", this.#onMouseMove());
     controls.canvas.removeEventListener("mouseout", this.#onMouseOut());
     controls.picker.removeEventListener("change", this.#onColorChange());
+    controls.sizeInput.removeEventListener("change", this.#onSizeChange());
   }
 }
 
@@ -101,6 +108,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     this.canvas = document.getElementById("imageCanvas");
     this.userCursors = new UserCursorManager(this.canvas);
     this.userColors = {};
+    this.userWidths = {};
   },
 
   connected() {
@@ -116,11 +124,19 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
   },
 
   install() {
-    this.relay.install({canvas: this.canvas, picker: document.querySelector("#colorPicker")});
+    this.relay.install({
+      canvas: this.canvas,
+      picker: document.querySelector("#colorPicker"),
+      sizeInput: document.querySelector("#brushSize"),
+    });
   },
 
   uninstall() {
-    this.relay.uninstall({canvas: this.canvas, picker: document.querySelector("#colorPicker")});
+    this.relay.uninstall({
+      canvas: this.canvas,
+      picker: document.querySelector("#colorPicker"),
+      sizeInput: document.querySelector("#brushSize"),
+    });
   },
 
   received(data) {
@@ -134,14 +150,24 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       break;
     case "color":
       for(const comp of "rgb") {
-        if(!Number.isInteger(data[comp]) || data[comp] < 0 || data[comp] > 0xff)
+        if(!Number.isInteger(data[comp]) || data[comp] < 0 || data[comp] > 0xff) {
+          console.error("dropping invalid", comp, data[comp]);
           return;
+        }
       }
       this.userColors[data.user_id] = `rgb(${data.r}, ${data.g}, ${data.b})`;
       break;
+    case "size":
+      if(!Number.isInteger(data.size) || data.size < 0 || data.size > 100) {
+        console.error("dropping invalid size", data.size);
+        return;
+      }
+      this.userWidths[data.user_id] = data.size;
+      break;
     case "line":
       const ctx = this.canvas.getContext("2d");
-      ctx.strokeStyle = this.userColors[data.user_id] || "black";
+      ctx.strokeStyle = this.userColors[data.user_id] ?? "black";
+      ctx.lineWidth = this.userWidths[data.user_id] ?? 1;
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
       ctx.lineTo(data.p2.x, data.p2.y);
