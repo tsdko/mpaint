@@ -81,7 +81,7 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 
 	const brushSampleDefaults = {
 		filter: "var(--no-antialias-filter)",
-		lineWidth: 4,
+		lineWidth: Number.parseFloat(document.querySelector("#brushSize").value),
 		lineCap: "round",
 		strokeStyle: "black",
 	};
