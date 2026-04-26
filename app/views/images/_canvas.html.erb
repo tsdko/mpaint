@@ -36,6 +36,10 @@
 }
 </style>
 
+<script>
+document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antialias-filter)";
+</script>
+
 <% unless readonly %>
 	<script>
 	document.querySelectorAll(".openableContainer").forEach(el => {
