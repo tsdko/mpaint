@@ -17,15 +17,16 @@ class CanvasRelay {
       lastClientY = e.clientY;
       const r = canvas.getBoundingClientRect();
       if(e.buttons & 1) {
-        console.log("clicked while moving", this.lastClientDown, e);
         if(this.lastClientDown !== null) {
+          // 1px jaggy brush strokes sometimes disappear with fractional coords
+          const aligned = Math.floor;
           const p1 = {
-            x: this.lastClientDown.x - r.left,
-            y: this.lastClientDown.y - r.top,
+            x: aligned(this.lastClientDown.x - r.left),
+            y: aligned(this.lastClientDown.y - r.top),
           };
           const p2 = {
-            x: e.clientX - r.left,
-            y: e.clientY - r.top,
+            x: aligned(e.clientX - r.left),
+            y: aligned(e.clientY - r.top),
           };
           const line = {p1: p1, p2: p2};
           if(canvas.dataset.tool === "eraser")
