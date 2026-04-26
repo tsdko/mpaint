@@ -85,6 +85,8 @@ class UserCursorManager {
       const cur = document.createElement("div");
       cur.dataset.userId = uid;
       cur.classList.add("userCursor");
+      cur.classList.add("mix-blend-difference");
+      cur.classList.add("text-white");
       cur.textContent = "↖";
       document.body.appendChild(cur);
       this.cursors[uid] = cur;
