@@ -1,17 +1,13 @@
-<h4><%= @image.title =%></h4>
-<div id="image" data-id="<%= @image.id =%>"></div>
-<div id="canvasTools">
-	<a href="#">✏️</a>
-	<a href="#">🧼</a>
-	<input id="colorPicker" type="color" />
+<div class="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr]">
+	<div id="image" data-id="<%= @image.id =%>"></div>
+	<h4 class="text-2xl col-start-2"><%= @image.title =%></h4>
+	<div id="canvasTools" class="mr-2">
+		<a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">✏️</a>
+		<%# <a href="#" class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md">🧼</a> %>
+		<input id="colorPicker" type="color" class="block rounded-md" />
+	</div>
+	<canvas class="bg-gray-100" id="imageCanvas" width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 </div>
-<!--
-canvas flow:
- - generate command
- - apply locally
- - send to websocket, broadcast to others
--->
-<canvas id="imageCanvas" width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 
 <!-- TODO: move out-of-line -->
 <style>
