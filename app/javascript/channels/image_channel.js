@@ -110,8 +110,8 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     if(!this.canvas.dataset.readonly)
       this.relay = new CanvasRelay((action, params) => this.perform(action, params));
     this.userCursors = new UserCursorManager(this.canvas);
-    this.userColors = {};
-    this.userWidths = {};
+    // {uid → {color: string, size: int}}
+    this.userBrushes = new Map();
   },
 
   connected() {
@@ -158,19 +158,20 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
           return;
         }
       }
-      this.userColors[data.user_id] = `rgb(${data.r}, ${data.g}, ${data.b})`;
+      this.userBrushes.getOrInsert(data.user_id, {}).color = `rgb(${data.r}, ${data.g}, ${data.b})`;
       break;
     case "size":
       if(!Number.isInteger(data.size) || data.size < 0 || data.size > 100) {
         console.error("dropping invalid size", data.size);
         return;
       }
-      this.userWidths[data.user_id] = data.size;
+      this.userBrushes.getOrInsert(data.user_id, {}).size = data.size;
       break;
     case "line":
       const ctx = this.canvas.getContext("2d");
-      ctx.strokeStyle = this.userColors[data.user_id] ?? "black";
-      ctx.lineWidth = this.userWidths[data.user_id] ?? 1;
+      const brush = this.userBrushes.get(data.user_id) ?? {};
+      ctx.strokeStyle = brush.color ?? "black";
+      ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
