@@ -13,7 +13,19 @@
 			<input id="colorPicker" type="color" class="block rounded-md" />
 			<div class="relative openableContainer">
 				<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
-				<div class="openable hidden block bg-gray-300 p-2 rounded-md absolute z-1"><input id="brushSize" min="1" max="100" type="range" /></div>
+				<div class="openable hidden block bg-gray-300 p-2 rounded-md absolute z-1">
+					<input id="brushSize" min="1" max="100" type="range" />
+					<fieldgroup>
+						<label class="rounded-md has-checked:bg-gray-500">
+							<input class="hidden" name="brushAntialias" type="radio" value="false" checked />
+							🔪
+						</label>
+						<label class="rounded-md has-checked:bg-gray-500">
+							<input class="hidden" name="brushAntialias" type="radio" value="true" />
+							🧈
+						</label>
+					</fieldgroup>
+				</div>
 			</div>
 		</div>
 	<% end %>
@@ -49,6 +61,31 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 		bsc.height = bscContainer.clientHeight;
 	}
 
+	const brushSampleDefaults = {
+		filter: "var(--no-antialias-filter)",
+		lineWidth: 4,
+		lineCap: "round",
+		strokeStyle: "black",
+	};
+
+	function drawBrushSample(canvas, opts) {
+		const ctx = canvas.getContext("2d");
+		for(const [k, v] of Object.entries(opts)) {
+			ctx[k] = v;
+		}
+		// canvas filters may get applied on the next event loop iteration
+		return new Promise((resolve) => {
+			setTimeout(() => {
+				ctx.beginPath();
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.moveTo(8, 8);
+				ctx.lineTo(canvas.width - 8, canvas.height - 8);
+				ctx.stroke();
+				resolve();
+			}, 0);
+		});
+	}
+
 	document.querySelectorAll(".openableContainer").forEach(el => {
 		const openable = el.querySelector(".openable");
 		const toggle = el.querySelector(".openableToggle");
@@ -78,17 +115,11 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 	canvas.addEventListener("mousedown", e => console.log("mousedown", e));
 	canvas.addEventListener("mouseup", e => console.log("mouseup", e));
 	document.getElementById("brushSize").addEventListener("input", e => {
-		const canvas = brushSizeCanvas;
-		const ctx = canvas.getContext("2d");
-		ctx.filter = "var(--no-antialias-filter)";
-		ctx.lineWidth = e.target.value;
-		ctx.lineCap = "round";
-		ctx.strokeStyle = "black";
-		ctx.beginPath();
-		ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ctx.moveTo(8, 8);
-		ctx.lineTo(canvas.width - 8, canvas.height - 8);
-		ctx.stroke();
+		drawBrushSample(brushSizeCanvas, {lineWidth: e.target.value});
 	});
+	document.querySelectorAll("input[name=brushAntialias]").forEach(el => el.addEventListener("input", ev => {
+		drawBrushSample(brushSizeCanvas, {filter: el.value === "true" ? "none" : "var(--no-antialias-filter)"});
+	}));
+	drawBrushSample(brushSizeCanvas, brushSampleDefaults);
 	</script>
 <% end %>

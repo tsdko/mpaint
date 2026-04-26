@@ -54,6 +54,13 @@ class CanvasRelay {
     };
   }
 
+  #onAntialiasChange() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return e => {
+      this.perform("antialias", {value: e.target.value === "true"})
+    };
+  }
+
   #onMouseOut() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return () => this.perform("poshide");
@@ -64,6 +71,8 @@ class CanvasRelay {
     controls.canvas.addEventListener("mouseout", this.#onMouseOut());
     controls.picker.addEventListener("change", this.#onColorChange());
     controls.sizeInput.addEventListener("change", this.#onSizeChange());
+    controls.antialiasOn.addEventListener("change", this.#onAntialiasChange());
+    controls.antialiasOff.addEventListener("change", this.#onAntialiasChange());
   }
 
   uninstall(controls) {
@@ -71,6 +80,8 @@ class CanvasRelay {
     controls.canvas.removeEventListener("mouseout", this.#onMouseOut());
     controls.picker.removeEventListener("change", this.#onColorChange());
     controls.sizeInput.removeEventListener("change", this.#onSizeChange());
+    controls.antialiasOn.removeEventListener("change", this.#onAntialiasChange());
+    controls.antialiasOff.removeEventListener("change", this.#onAntialiasChange());
   }
 }
 
@@ -131,6 +142,8 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       canvas: this.canvas,
       picker: document.querySelector("#colorPicker"),
       sizeInput: document.querySelector("#brushSize"),
+      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
+      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
     });
   },
 
@@ -139,6 +152,8 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       canvas: this.canvas,
       picker: document.querySelector("#colorPicker"),
       sizeInput: document.querySelector("#brushSize"),
+      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
+      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
     });
   },
 
@@ -167,12 +182,16 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       }
       this.userBrushes.getOrInsert(data.user_id, {}).size = data.size;
       break;
+    case "antialias":
+      this.userBrushes.getOrInsert(data.user_id, {}).antialias = data.value;
+      break;
     case "line":
       const ctx = this.canvas.getContext("2d");
       const brush = this.userBrushes.get(data.user_id) ?? {};
       ctx.strokeStyle = brush.color ?? "black";
       ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";
+      ctx.filter = brush.antialias ? "none" : "var(--no-antialias-filter)";
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
       ctx.lineTo(data.p2.x, data.p2.y);
