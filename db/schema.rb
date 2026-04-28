@@ -10,7 +10,15 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_27_234816) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_28_201218) do
+  create_table "image_strokes", force: :cascade do |t|
+    t.string "connection_id", null: false
+    t.float "created_at_delta_secs", null: false
+    t.json "data", default: [], null: false
+    t.integer "image_id", null: false
+    t.index ["image_id"], name: "index_image_strokes_on_image_id"
+  end
+
   create_table "images", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "height", default: 400, null: false
@@ -48,6 +56,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_27_234816) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "image_strokes", "images"
   add_foreign_key "messages", "users", column: "author_id"
   add_foreign_key "sessions", "users"
 end

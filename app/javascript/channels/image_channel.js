@@ -24,7 +24,7 @@ class CanvasRelay {
           x: aligned(inp.cx - r.left),
           y: aligned(inp.cy - r.top),
         };
-        const line = {p1: p1, p2: p2};
+        const line = {pointer_id: inp.id, p1: p1, p2: p2};
         if(canvas.dataset.tool === "eraser")
           line.eraser = true;
         this.perform("line", line);
@@ -53,6 +53,14 @@ class CanvasRelay {
     };
   }
 
+  #onPointerUpCancel() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      console.log("pointer up or cancel", ev);
+      this.perform("endstroke", {pointer_id: ev.pointerId});
+    };
+  }
+
   #onSizeChange() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => this.perform("size", {size: Number.parseFloat(ev.target.value)});
@@ -73,13 +81,15 @@ class CanvasRelay {
   #onAntialiasChange() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return e => {
-      this.perform("antialias", {value: e.target.value === "true"})
+      this.perform("antialias", {antialias: e.target.value === "true"})
     };
   }
 
   install(controls) {
     controls.canvas.addEventListener("pointermove", this.#onPointerMove());
     controls.canvas.addEventListener("pointerout", this.#onPointerOut());
+    controls.canvas.addEventListener("pointerup", this.#onPointerUpCancel());
+    controls.canvas.addEventListener("pointercancel", this.#onPointerUpCancel());
     controls.picker.addEventListener("change", this.#onColorChange());
     controls.sizeInput.addEventListener("change", this.#onSizeChange());
     controls.antialiasOn.addEventListener("change", this.#onAntialiasChange());
@@ -89,6 +99,8 @@ class CanvasRelay {
   uninstall(controls) {
     controls.canvas.removeEventListener("pointermove", this.#onPointerMove());
     controls.canvas.removeEventListener("pointerout", this.#onPointerOut());
+    controls.canvas.removeEventListener("pointerup", this.#onPointerUpCancel());
+    controls.canvas.removeEventListener("pointercancel", this.#onPointerUpCancel());
     controls.picker.removeEventListener("change", this.#onColorChange());
     controls.sizeInput.removeEventListener("change", this.#onSizeChange());
     controls.antialiasOn.removeEventListener("change", this.#onAntialiasChange());
@@ -191,7 +203,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
       this.userBrushes.getOrInsert(data.user_id, {}).size = data.size;
       break;
     case "antialias":
-      this.userBrushes.getOrInsert(data.user_id, {}).antialias = data.value;
+      this.userBrushes.getOrInsert(data.user_id, {}).antialias = data.antialias;
       break;
     case "line":
       const ctx = this.canvas.getContext("2d");

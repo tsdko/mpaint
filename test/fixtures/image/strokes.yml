@@ -1,0 +1,13 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  image: one
+  created_at_delta_secs: 1.5
+  connection_id: MyString
+  data: 
+
+two:
+  image: two
+  created_at_delta_secs: 1.5
+  connection_id: MyString
+  data: 
