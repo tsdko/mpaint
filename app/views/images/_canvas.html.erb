@@ -132,3 +132,9 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 	}));
 	</script>
 <% end %>
+
+<script>
+	window.addEventListener("load", () => {
+		imageSubscribe(<%= @image.id %>, document.getElementById("imageCanvas"));
+	});
+</script>

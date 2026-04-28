@@ -135,7 +135,7 @@ class UserCursorManager {
   }
 }
 
-consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementById("image").dataset.id}, {
+const imageSubscriber = (canvas) => ({
   initialized() {
     this.canvas = document.getElementById("imageCanvas");
     if(!this.canvas.dataset.readonly)
@@ -224,3 +224,7 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     }
   },
 });
+
+window.imageSubscribe = (id, canvas) => {
+  consumer.subscriptions.create({channel: "ImageChannel", id: id}, imageSubscriber(canvas));
+};
