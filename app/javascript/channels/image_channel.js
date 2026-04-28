@@ -4,7 +4,7 @@ class CanvasRelay {
   constructor(perform) {
     this.perform = perform;
 
-    this.touches = new Map();
+    this.pointers = new Map();
   }
 
   #onPosInput(inState, inp) {
@@ -33,12 +33,24 @@ class CanvasRelay {
     } else {
       inState.lastDown = null;
     }
-    this.perform("pos", {input_id: inp.id, x: inp.cx - r.left, y: inp.cy - r.top});
+    this.perform("pos", {pointer_id: inp.id, x: inp.cx - r.left, y: inp.cy - r.top});
   }
 
-  #onMouseMove() {
-    const mstate = {};
-    return e => this.#onPosInput(mstate, {id: "mouse", cx: e.clientX, cy: e.clientY, down: e.buttons & 1});
+  #onPointerMove() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      const inState = this.pointers.getOrInsert(ev.pointerId, {});
+      const down = ev.pointerType === "mouse" ? (ev.buttons & 1) : true;
+      this.#onPosInput(inState, {id: ev.pointerId, cx: ev.clientX, cy: ev.clientY, down: down});
+    };
+  }
+
+  #onPointerOut() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      this.perform("poshide", {pointer_id: ev.pointerId});
+      this.pointers.delete(ev.pointerId);
+    };
   }
 
   #onSizeChange() {
@@ -65,36 +77,9 @@ class CanvasRelay {
     };
   }
 
-  #onMouseOut() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return () => this.perform("poshide", {input_id: "mouse"});
-  }
-
-  #onTouch() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      for(const t of ev.changedTouches) {
-        const inState = this.touches.getOrInsert(t.identifier, {});
-        this.#onPosInput(inState, {id: t.identifier, cx: t.clientX, cy: t.clientY, down: true});
-      }
-    };
-  }
-
-  #onTouchEnd() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      for(const t of ev.changedTouches) {
-        this.perform("poshide", {input_id: t.identifier});
-        this.touches.delete(t.identifier);
-      }
-    };
-  }
-
   install(controls) {
-    controls.canvas.addEventListener("mousemove", this.#onMouseMove());
-    controls.canvas.addEventListener("mouseout", this.#onMouseOut());
-    controls.canvas.addEventListener("touchmove", this.#onTouch());
-    controls.canvas.addEventListener("touchend", this.#onTouchEnd());
+    controls.canvas.addEventListener("pointermove", this.#onPointerMove());
+    controls.canvas.addEventListener("pointerout", this.#onPointerOut());
     controls.picker.addEventListener("change", this.#onColorChange());
     controls.sizeInput.addEventListener("change", this.#onSizeChange());
     controls.antialiasOn.addEventListener("change", this.#onAntialiasChange());
@@ -102,10 +87,8 @@ class CanvasRelay {
   }
 
   uninstall(controls) {
-    controls.canvas.removeEventListener("mousemove", this.#onMouseMove());
-    controls.canvas.removeEventListener("mouseout", this.#onMouseOut());
-    controls.canvas.removeEventListener("touchmove", this.#onTouch());
-    controls.canvas.removeEventListener("touchend", this.#onTouchEnd());
+    controls.canvas.removeEventListener("pointermove", this.#onPointerMove());
+    controls.canvas.removeEventListener("pointerout", this.#onPointerOut());
     controls.picker.removeEventListener("change", this.#onColorChange());
     controls.sizeInput.removeEventListener("change", this.#onSizeChange());
     controls.antialiasOn.removeEventListener("change", this.#onAntialiasChange());
@@ -186,10 +169,10 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     console.log("got", data);
     switch(data.action) {
     case "pos":
-      this.userCursors.show(data.user_id + "/" + data.input_id, data.x, data.y);
+      this.userCursors.show(data.user_id + "/" + data.pointer_id, data.x, data.y);
       break;
     case "poshide":
-      this.userCursors.hide(data.user_id + "/" + data.input_id);
+      this.userCursors.hide(data.user_id + "/" + data.pointer_id);
       break;
     case "color":
       for(const comp of "rgb") {
