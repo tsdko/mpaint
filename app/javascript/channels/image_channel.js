@@ -4,41 +4,41 @@ class CanvasRelay {
   constructor(perform) {
     this.perform = perform;
 
-    this.lastClientDown = null;
+    this.touches = new Map();
+  }
+
+  #onPosInput(inState, inp) {
+    if(inState.last?.cx === inp.cx && inState.last?.cy === inp.cy)
+      return;
+    inState.last = {cx: inp.cx, cy: inp.cy};
+    const r = canvas.getBoundingClientRect();
+    if(inp.down) {
+      if(inState.lastDown) {
+        // 1px jaggy brush strokes sometimes disappear with fractional coords
+        const aligned = Math.floor;
+        const p1 = {
+          x: aligned(inState.lastDown.cx - r.left),
+          y: aligned(inState.lastDown.cy - r.top),
+        };
+        const p2 = {
+          x: aligned(inp.cx - r.left),
+          y: aligned(inp.cy - r.top),
+        };
+        const line = {p1: p1, p2: p2};
+        if(canvas.dataset.tool === "eraser")
+          line.eraser = true;
+        this.perform("line", line);
+      }
+      inState.lastDown = {cx: inp.cx, cy: inp.cy};
+    } else {
+      inState.lastDown = null;
+    }
+    this.perform("pos", {input_id: inp.id, x: inp.cx - r.left, y: inp.cy - r.top});
   }
 
   #onMouseMove() {
-    let lastClientX, lastClientY;
-    let lastDownClientX = null, lastDownClientY = null;
-    return e => {
-      if(lastClientX == e.clientX && lastClientY == e.clientY)
-        return;
-      lastClientX = e.clientX;
-      lastClientY = e.clientY;
-      const r = canvas.getBoundingClientRect();
-      if(e.buttons & 1) {
-        if(this.lastClientDown !== null) {
-          // 1px jaggy brush strokes sometimes disappear with fractional coords
-          const aligned = Math.floor;
-          const p1 = {
-            x: aligned(this.lastClientDown.x - r.left),
-            y: aligned(this.lastClientDown.y - r.top),
-          };
-          const p2 = {
-            x: aligned(e.clientX - r.left),
-            y: aligned(e.clientY - r.top),
-          };
-          const line = {p1: p1, p2: p2};
-          if(canvas.dataset.tool === "eraser")
-            line.eraser = true;
-          this.perform("line", line);
-        }
-        this.lastClientDown = {x: e.clientX, y: e.clientY};
-      } else {
-        this.lastClientDown = null;
-      }
-      this.perform("pos", {x: e.clientX - r.left, y: e.clientY - r.top});
-    };
+    const mstate = {};
+    return e => this.#onPosInput(mstate, {id: "mouse", cx: e.clientX, cy: e.clientY, down: e.buttons & 1});
   }
 
   #onSizeChange() {
@@ -67,12 +67,34 @@ class CanvasRelay {
 
   #onMouseOut() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return () => this.perform("poshide");
+    return () => this.perform("poshide", {input_id: "mouse"});
+  }
+
+  #onTouch() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      for(const t of ev.changedTouches) {
+        const inState = this.touches.getOrInsert(t.identifier, {});
+        this.#onPosInput(inState, {id: t.identifier, cx: t.clientX, cy: t.clientY, down: true});
+      }
+    };
+  }
+
+  #onTouchEnd() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      for(const t of ev.changedTouches) {
+        this.perform("poshide", {input_id: t.identifier});
+        this.touches.delete(t.identifier);
+      }
+    };
   }
 
   install(controls) {
     controls.canvas.addEventListener("mousemove", this.#onMouseMove());
     controls.canvas.addEventListener("mouseout", this.#onMouseOut());
+    controls.canvas.addEventListener("touchmove", this.#onTouch());
+    controls.canvas.addEventListener("touchend", this.#onTouchEnd());
     controls.picker.addEventListener("change", this.#onColorChange());
     controls.sizeInput.addEventListener("change", this.#onSizeChange());
     controls.antialiasOn.addEventListener("change", this.#onAntialiasChange());
@@ -82,6 +104,8 @@ class CanvasRelay {
   uninstall(controls) {
     controls.canvas.removeEventListener("mousemove", this.#onMouseMove());
     controls.canvas.removeEventListener("mouseout", this.#onMouseOut());
+    controls.canvas.removeEventListener("touchmove", this.#onTouch());
+    controls.canvas.removeEventListener("touchend", this.#onTouchEnd());
     controls.picker.removeEventListener("change", this.#onColorChange());
     controls.sizeInput.removeEventListener("change", this.#onSizeChange());
     controls.antialiasOn.removeEventListener("change", this.#onAntialiasChange());
@@ -162,10 +186,10 @@ consumer.subscriptions.create({channel: "ImageChannel", id: document.getElementB
     console.log("got", data);
     switch(data.action) {
     case "pos":
-      this.userCursors.show(data.user_id, data.x, data.y);
+      this.userCursors.show(data.user_id + "/" + data.input_id, data.x, data.y);
       break;
     case "poshide":
-      this.userCursors.hide(data.user_id);
+      this.userCursors.hide(data.user_id + "/" + data.input_id);
       break;
     case "color":
       for(const comp of "rgb") {
