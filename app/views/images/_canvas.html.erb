@@ -45,31 +45,19 @@
 .bg-checkerboard {
 	background: repeating-conic-gradient(var(--color-gray-200) 0 25%, white 0 50%) 50% / 32px 32px;
 }
-
-.userCursor::after {
-	content: attr(data-user-id);
-	position: relative;
-	top: -1em;
-	pointer-events: none;
-	font-size: initial;
-}
-.userCursor {
-	position: absolute;
-	pointer-events: none;
-	font-size: 2em;
-
-	background-image: var(--white-cross-7);
-	background-repeat: no-repeat;
-	/* crosshair center at (3, 3), offset so we see the entire thing */
-	margin-top: -3px;
-	margin-left: -3px;
-}
 </style>
 
 <script>
 document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antialias-filter)";
 </script>
 
+<template id="userCursor">
+	<%# -m{t,l}-[3px]: crosshair center at (3, 3), offset so we see the entire thing %>
+	<div class="bg-(image:--white-cross-7) bg-no-repeat absolute -mt-[3px] -ml-[3px] pointer-events-none mix-blend-difference text-white">
+		<div class="userCursorName ps-2"></div>
+	</div>
+</template>
+	
 <% unless readonly %>
 	<script>
 	{

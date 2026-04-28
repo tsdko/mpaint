@@ -97,17 +97,15 @@ class UserCursorManager {
 
   show(uid, x, y) {
     if(!this.cursors[uid]) {
-      const cur = document.createElement("div");
-      cur.dataset.userId = uid;
-      cur.classList.add("userCursor");
-      cur.classList.add("mix-blend-difference");
-      cur.classList.add("text-white");
+      // get the root div so the reference is still alive after calling appendChild
+      const cur = document.importNode(document.getElementById("userCursor").content, true)
+                    .querySelector("div");
+      cur.querySelector(".userCursorName").textContent = uid;
       document.body.appendChild(cur);
       this.cursors[uid] = cur;
     }
     const cur = this.cursors[uid];
     const r = canvas.getBoundingClientRect();
-    // left/top can't be referenced by attr(data-*) so we assign styles directly
     cur.style.left = window.scrollX + r.left + x + "px";
     cur.style.top = window.scrollY + r.top + y + "px";
   }
