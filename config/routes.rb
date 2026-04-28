@@ -15,4 +15,6 @@ Rails.application.routes.draw do
   # root "posts#index"
 
   resources :images, only: [:new, :index, :show, :edit]
+  resources :messages, only: [:index, :show]
+  resources :users, only: [:show]
 end

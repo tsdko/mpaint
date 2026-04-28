@@ -1,0 +1,10 @@
+<div class="flex rounded-md p-2 bg-stone-200">
+  <div class="flex-1">
+    <%= render partial: "users/header", locals: {user: message.author} %>
+    <div><%= message.content %></div>
+  </div>
+  <div>
+    <% if local_assigns[:show_target] %>on <%= link_to message.target %>, <% end %>
+    <%= message.created_at %>
+  </div>
+</div>

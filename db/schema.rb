@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_25_201608) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_27_234816) do
   create_table "images", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "height", default: 400, null: false
@@ -18,6 +18,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_201608) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.integer "width", default: 640, null: false
+  end
+
+  create_table "messages", force: :cascade do |t|
+    t.integer "author_id"
+    t.string "content"
+    t.datetime "created_at", null: false
+    t.integer "target_id"
+    t.string "target_type"
+    t.datetime "updated_at", null: false
+    t.index ["author_id"], name: "index_messages_on_author_id"
+    t.index ["target_type", "target_id"], name: "index_messages_on_target"
   end
 
   create_table "sessions", force: :cascade do |t|
@@ -37,5 +48,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_25_201608) do
     t.index ["email_address"], name: "index_users_on_email_address", unique: true
   end
 
+  add_foreign_key "messages", "users", column: "author_id"
   add_foreign_key "sessions", "users"
 end
