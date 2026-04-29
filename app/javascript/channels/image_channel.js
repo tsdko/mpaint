@@ -140,50 +140,16 @@ class UserCursorManager {
   }
 }
 
-const imageSubscriber = (canvas) => ({
-  initialized() {
-    this.canvas = document.getElementById("imageCanvas");
-    if(!this.canvas.dataset.readonly)
-      this.relay = new CanvasRelay((action, params) => this.perform(action, params));
+class ServerRelay {
+  constructor(canvas) {
+    this.canvas = canvas;
     this.userCursors = new UserCursorManager(this.canvas);
     // {uid → {color: string, size: int}}
     this.userBrushes = new Map();
-  },
+  }
 
-  connected() {
-    this.install();
-  },
-
-  disconnected() {
-    this.uninstall();
-  },
-
-  rejected() {
-    this.uninstall();
-  },
-
-  install() {
-    this.relay?.install({
-      canvas: this.canvas,
-      picker: document.querySelector("#colorPicker"),
-      sizeInput: document.querySelector("#brushSize"),
-      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
-      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
-    });
-  },
-
-  uninstall() {
-    this.relay?.uninstall({
-      canvas: this.canvas,
-      picker: document.querySelector("#colorPicker"),
-      sizeInput: document.querySelector("#brushSize"),
-      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
-      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
-    });
-  },
-
-  received(data) {
-    console.log("got", data);
+  handleData(data) {
+    console.log("handleData", data);
     switch(data.action) {
     case "pos":
       this.userCursors.show(data.user_id + "/" + data.pointer_id, data.x, data.y);
@@ -227,9 +193,56 @@ const imageSubscriber = (canvas) => ({
       ctx.stroke();
       break;
     }
+  }
+}
+
+const imageSubscriber = (canvas, serverRelay) => ({
+  initialized() {
+    this.canvas = document.getElementById("imageCanvas");
+    if(!this.canvas.dataset.readonly)
+      this.relay = new CanvasRelay((action, params) => this.perform(action, params));
+    this.serverRelay = serverRelay;
+  },
+
+  connected() {
+    this.install();
+  },
+
+  disconnected() {
+    this.uninstall();
+  },
+
+  rejected() {
+    this.uninstall();
+  },
+
+  install() {
+    this.relay?.install({
+      canvas: this.canvas,
+      picker: document.querySelector("#colorPicker"),
+      sizeInput: document.querySelector("#brushSize"),
+      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
+      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
+    });
+  },
+
+  uninstall() {
+    this.relay?.uninstall({
+      canvas: this.canvas,
+      picker: document.querySelector("#colorPicker"),
+      sizeInput: document.querySelector("#brushSize"),
+      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
+      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
+    });
+  },
+
+  received(data) {
+    //console.log("got", data);
+    this.serverRelay.handleData(data);
   },
 });
 
-window.imageSubscribe = (id, canvas) => {
-  consumer.subscriptions.create({channel: "ImageChannel", id: id}, imageSubscriber(canvas));
+window.ServerRelay = ServerRelay;
+window.imageSubscribe = (id, canvas, serverRelay) => {
+  consumer.subscriptions.create({channel: "ImageChannel", id: id}, imageSubscriber(canvas, serverRelay));
 };

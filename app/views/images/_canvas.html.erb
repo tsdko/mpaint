@@ -135,6 +135,11 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 
 <script>
 	window.addEventListener("load", () => {
-		imageSubscribe(<%= @image.id %>, document.getElementById("imageCanvas"));
+		const canvas = document.getElementById("imageCanvas");
+		const sRelay = new ServerRelay(canvas);
+		fetch("<%= url_for :controller => "image_strokes", :image_id => @image.id, :format => :json %>")
+			.then(r => r.json())
+			.then(j => j.forEach(ds => ds.forEach(d => sRelay.handleData(d))))
+			.then(() => imageSubscribe(<%= @image.id %>, canvas, sRelay));
 	});
 </script>
