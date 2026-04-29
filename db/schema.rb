@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_29_170354) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_29_193546) do
   create_table "image_strokes", force: :cascade do |t|
     t.string "connection_id", null: false
     t.float "created_at_delta_secs", null: false
@@ -22,7 +22,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_29_170354) do
   create_table "images", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "height", default: 400, null: false
-    t.string "path"
     t.string "title"
     t.datetime "updated_at", null: false
     t.integer "width", default: 640, null: false
