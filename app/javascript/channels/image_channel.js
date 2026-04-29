@@ -36,12 +36,17 @@ class CanvasRelay {
     this.perform("pos", {pointer_id: inp.id, x: inp.cx - r.left, y: inp.cy - r.top});
   }
 
+  #isDown(ev) {
+    if(ev.pointerType === "mouse")
+      return ev.buttons & 1;
+    return ev.pressure > 0;
+  }
+
   #onPointerMove() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => {
       const inState = this.pointers.getOrInsert(ev.pointerId, {});
-      const down = ev.pointerType === "mouse" ? (ev.buttons & 1) : true;
-      this.#onPosInput(inState, {id: ev.pointerId, cx: ev.clientX, cy: ev.clientY, down: down});
+      this.#onPosInput(inState, {id: ev.pointerId, cx: ev.clientX, cy: ev.clientY, down: this.#isDown(ev)});
     };
   }
 
