@@ -1,4 +1,6 @@
 class MessagesController < ApplicationController
+  allow_unauthenticated_access only: [:show]
+
   def index
     @messages = Message.all
   end
