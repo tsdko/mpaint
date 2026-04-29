@@ -19,6 +19,10 @@ class Image::Stroke < ApplicationRecord
     data << stored_from_wire(t, wdata)
   end
 
+  def wire_data
+    data.map { |d| wire_from_stored(d) }
+  end
+
   private
     STORED_FROM_WIRE_HEADERS = {
       :line => "l",
@@ -54,18 +58,18 @@ class Image::Stroke < ApplicationRecord
       st = WIRE_FROM_STORED_HEADERS[data[0]]
       sd =
         case [st, *data[1..]]
-        when [:line, x1, y1, x2, y2]
+        in [:line, x1, y1, x2, y2]
           {p1: {x: x1, y: y1}, p2: {x: x2, y: y2}}
-        when [:line, x1, y1, x2, y2, eraser]
+        in [:line, x1, y1, x2, y2, eraser]
           {p1: {x: x1, y: y1}, p2: {x: x2, y: y2}, eraser: !!eraser}
-        when [:color, r, g, b]
+        in [:color, r, g, b]
           {r: r, g: g, b: b}
-        when [:size, s]
+        in [:size, s]
           {size: s}
-        when [:antialias, a]
+        in [:antialias, a]
           {antialias: a}
         else
-          raise "unsupported stored type #{data[0]}"
+          raise "unsupported stored type #{data}"
         end
       [st, sd]
     end

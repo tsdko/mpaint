@@ -1,0 +1,2 @@
+module ImageStrokesHelper
+end

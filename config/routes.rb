@@ -14,7 +14,9 @@ Rails.application.routes.draw do
   # Defines the root path route ("/")
   # root "posts#index"
 
-  resources :images, only: [:new, :index, :show, :edit]
+  resources :images, only: [:new, :index, :show, :edit] do
+    resources :image_strokes, path: "strokes", only: [:index]
+  end
   resources :messages, only: [:index, :show]
   resources :users, only: [:show]
 end
