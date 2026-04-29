@@ -32,6 +32,7 @@ class Image::Stroke < ApplicationRecord
       :color => "cl",
       :size => "sz",
       :antialias => "aal",
+      :image => "img",
     }
     WIRE_FROM_STORED_HEADERS = STORED_FROM_WIRE_HEADERS.invert
 
@@ -71,6 +72,8 @@ class Image::Stroke < ApplicationRecord
           {size: s}
         in [:antialias, a]
           {antialias: a}
+        in [:image, d]
+          {data: d}
         else
           raise "unsupported stored type #{data}"
         end

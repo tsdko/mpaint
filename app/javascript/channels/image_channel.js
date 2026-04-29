@@ -192,6 +192,12 @@ class ServerRelay {
       ctx.lineTo(data.p2.x, data.p2.y);
       ctx.stroke();
       break;
+    case "image":
+      const img = new Image();
+      // FIXME: ideally this should block but right now "image" is only used for immutable
+      //        single-image drawings anyway
+      img.onload = () => this.canvas.getContext("2d").drawImage(img, 0, 0);
+      img.src = data.data;
     }
   }
 }
