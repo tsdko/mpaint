@@ -6,11 +6,7 @@ class Image::Stroke < ApplicationRecord
   end
 
   def add_brush_delta(brush)
-    bwire =
-      brush.map do |k, v|
-        t, d = stored_from_wire(k, v)
-        [t, *d]
-      end
+    bwire = brush.map { |k, v| stored_from_wire(k, v) }
     self.data = [*bwire, *data]
   end
 
@@ -55,7 +51,7 @@ class Image::Stroke < ApplicationRecord
         else
           raise "unsupported wire type #{t}"
         end
-      [STORED_FROM_WIRE_HEADERS[t], sd]
+      [STORED_FROM_WIRE_HEADERS[t], *sd]
     end
 
     def wire_from_stored(data)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_28_201218) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_29_170354) do
   create_table "image_strokes", force: :cascade do |t|
     t.string "connection_id", null: false
     t.float "created_at_delta_secs", null: false
