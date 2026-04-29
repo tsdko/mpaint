@@ -1,0 +1,14 @@
+<div class="flex p-4 bg-gray-300">
+  <a class="pe-8" href="<%= root_url %>">
+    🐈‍⬛
+  </a>
+
+  <div class="flex-1">
+    <%= link_to "Draw", {controller: "images", action: :new}, class: "font-500" %>
+  </div>
+  <% if authenticated? %>
+    <%= link_to Current.user %>
+  <% else %>
+    <%= link_to "Sign in", controller: "session", action: :new %>
+  <% end %>
+</div>
