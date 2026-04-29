@@ -37,7 +37,7 @@
 			</div>
 		</div>
 	<% end %>
-	<canvas class="bg-checkerboard touch-pinch-zoom" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+	<canvas class="bg-checkerboard brightness-50 touch-pinch-zoom" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 </div>
 
 <!-- TODO: move out-of-line -->
@@ -140,6 +140,9 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 		fetch("<%= url_for :controller => "image_strokes", :image_id => @image.id, :format => :json %>")
 			.then(r => r.json())
 			.then(j => j.forEach(ds => ds.forEach(d => sRelay.handleData(d))))
-			.then(() => imageSubscribe(<%= @image.id %>, canvas, sRelay));
+			.then(() => {
+				canvas.classList.remove("brightness-50");
+				imageSubscribe(<%= @image.id %>, canvas, sRelay);
+			});
 	});
 </script>
