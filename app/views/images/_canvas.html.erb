@@ -1,8 +1,7 @@
 <%# locals: (readonly: false) %>
 
 <div class="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr]">
-	<div id="image" data-id="<%= @image.id =%>"></div>
-	<h4 class="text-2xl col-start-2"><%= @image.title =%></h4>
+	<h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
 	<% if readonly %>
 		<div class="mr-2">
 		</div>

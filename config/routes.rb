@@ -13,7 +13,9 @@ Rails.application.routes.draw do
 
   root "images#index"
 
-  resources :images, only: [:new, :index, :show, :edit] do
+  resources :image_strokes, only: [:index]
+
+  resources :images, only: [:new, :create, :index, :show, :edit] do
     resources :image_strokes, path: "strokes", only: [:index]
   end
   resources :messages, only: [:index, :show]

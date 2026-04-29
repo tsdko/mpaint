@@ -1,1 +1,22 @@
-<%= render "canvas" =%>
+<% if !@image.valid? %>
+  <div class="rounded-md p-2 m-2 bg-red-200">
+    <% @image.errors.full_messages.each do |err| %>
+      <div><%= err %></div>
+    <% end %>
+  </div>
+<% end %>
+<%= form_with model: @image do |form| %>
+  <div>
+    <%= form.label :title %>
+    <%= form.text_field :title %>
+  </div>
+  <div>
+    <%= form.label :width %>
+    <%= form.number_field :width %>
+  </div>
+  <div>
+    <%= form.label :height %>
+    <%= form.number_field :height %>
+  </div>
+  <%= form.submit %>
+<% end %>
