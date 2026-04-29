@@ -9,6 +9,6 @@
   <% if authenticated? %>
     <%= link_to Current.user %>
   <% else %>
-    <%= link_to "Sign in", controller: "session", action: :new %>
+    <%= link_to "Sign in", new_session_url %>
   <% end %>
 </div>
