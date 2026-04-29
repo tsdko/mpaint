@@ -1,6 +1,10 @@
 class ImagesController < ApplicationController
   allow_unauthenticated_access
 
+  def index
+    @images = Image.all
+  end
+
   def show
     @image = Image.find(params[:id])
   end

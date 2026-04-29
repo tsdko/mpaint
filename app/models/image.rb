@@ -4,4 +4,12 @@ class Image < ApplicationRecord
 
   validates :width, presence: true
   validates :height, presence: true
+
+  def last_stroke
+    strokes.order(id: :desc).first
+  end
+
+  def to_s
+    title || "Image #{id}"
+  end
 end
