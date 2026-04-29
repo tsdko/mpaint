@@ -14,7 +14,7 @@ class ImageChannel < ApplicationCable::Channel
   end
 
   def unsubscribed
-    # Any cleanup needed when channel is unsubscribed
+    broadcast_action({action: "poshide", user_id: connection.connection_identifier()})
   end
 
   def pos(data)

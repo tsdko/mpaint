@@ -119,24 +119,35 @@ class UserCursorManager {
     this.cursors = {};
   }
 
-  show(uid, x, y) {
-    if(!this.cursors[uid]) {
+  show(uid, pid, x, y) {
+    const cid = uid + "/" + pid;
+    if(!this.cursors[cid]) {
       // get the root div so the reference is still alive after calling appendChild
       const cur = document.importNode(document.getElementById("userCursor").content, true)
                     .querySelector("div");
-      cur.querySelector(".userCursorName").textContent = uid;
+      cur.querySelector(".userCursorName").textContent = cid;
       document.body.appendChild(cur);
-      this.cursors[uid] = cur;
+      this.cursors[cid] = cur;
     }
-    const cur = this.cursors[uid];
+    const cur = this.cursors[cid];
     const r = canvas.getBoundingClientRect();
     cur.style.left = window.scrollX + r.left + x + "px";
     cur.style.top = window.scrollY + r.top + y + "px";
   }
 
-  hide(uid) {
-    this.cursors[uid]?.remove();
-    delete this.cursors[uid];
+  #hideCid(cid) {
+    this.cursors[cid]?.remove();
+    delete this.cursors[cid];
+  }
+
+  hide(uid, pid) {
+    this.#hideCid(uid + "/" + pid);
+  }
+
+  hideAll(uid) {
+    const toRemove = [...Object.keys(this.cursors).filter(cid => cid.startsWith(uid + "/"))];
+    for(const cid of toRemove)
+      this.#hideCid(cid);
   }
 }
 
@@ -152,10 +163,13 @@ class ServerRelay {
     console.log("handleData", data);
     switch(data.action) {
     case "pos":
-      this.userCursors.show(data.user_id + "/" + data.pointer_id, data.x, data.y);
+      this.userCursors.show(data.user_id, data.pointer_id, data.x, data.y);
       break;
     case "poshide":
-      this.userCursors.hide(data.user_id + "/" + data.pointer_id);
+      if(data.pointer_id)
+        this.userCursors.hide(data.user_id, data.pointer_id);
+      else
+        this.userCursors.hideAll(data.user_id);
       break;
     case "color":
       for(const comp of "rgb") {
