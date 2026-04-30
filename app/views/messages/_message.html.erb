@@ -5,6 +5,6 @@
   </div>
   <div>
     <% if local_assigns[:show_target] %>on <%= link_to message.target %>, <% end %>
-    <%= message.created_at %>
+    <%= render "datetime", datetime: message.created_at %>
   </div>
 </div>

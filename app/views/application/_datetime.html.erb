@@ -1,0 +1,11 @@
+<%
+  main = datetime
+  sub = time_ago_in_words(datetime) + " ago"
+  main, sub = sub, main if local_assigns[:relative]
+%>
+<time
+  datetime="<%= datetime %>"
+  <%= "data-is-relative" if local_assigns[:relative] %>
+  title="<%= sub %>">
+    <%= main %>
+</time>
