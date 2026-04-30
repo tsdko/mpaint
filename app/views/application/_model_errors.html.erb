@@ -1,0 +1,7 @@
+<% if not model.valid? %>
+  <div class="rounded-md p-2 m-2 bg-red-200">
+    <% model.errors.full_messages.each do |err| %>
+      <div><%= err %></div>
+    <% end %>
+  </div>
+<% end %>
