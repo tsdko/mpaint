@@ -1,9 +1,10 @@
 import consumer from "channels/consumer";
 
 class CanvasRelay {
-  constructor(perform) {
+  constructor(canvas, perform) {
     this.perform = perform;
 
+    this.canvas = canvas;
     this.pointers = new Map();
   }
 
@@ -11,7 +12,7 @@ class CanvasRelay {
     if(inState.last?.cx === inp.cx && inState.last?.cy === inp.cy)
       return;
     inState.last = {cx: inp.cx, cy: inp.cy};
-    const r = canvas.getBoundingClientRect();
+    const r = this.canvas.getBoundingClientRect();
     if(inp.down) {
       if(inState.lastDown) {
         // 1px jaggy brush strokes sometimes disappear with fractional coords
@@ -132,7 +133,7 @@ class UserCursorManager {
       this.cursors[cid] = cur;
     }
     const cur = this.cursors[cid];
-    const r = canvas.getBoundingClientRect();
+    const r = this.canvas.getBoundingClientRect();
     cur.style.left = window.scrollX + r.left + x + "px";
     cur.style.top = window.scrollY + r.top + y + "px";
   }
@@ -231,7 +232,7 @@ const imageSubscriber = (canvas, serverRelay) => ({
   initialized() {
     this.canvas = document.getElementById("imageCanvas");
     if(!this.canvas.dataset.readonly)
-      this.relay = new CanvasRelay((action, params) => this.perform(action, params));
+      this.relay = new CanvasRelay(this.canvas, (action, params) => this.perform(action, params));
     this.serverRelay = serverRelay;
   },
 
