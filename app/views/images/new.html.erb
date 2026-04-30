@@ -5,18 +5,19 @@
     <% end %>
   </div>
 <% end %>
-<%= form_with model: @image do |form| %>
-  <div>
+<%# TODO: move classes to form builder %>
+<%= form_with model: @image, class: "grid grid-cols-[auto_1fr] max-w-sm" do |form| %>
+  <div class="contents">
     <%= form.label :title %>
-    <%= form.text_field :title %>
+    <%= form.text_field :title, class: "rounded border-1 ps-1 pe-1 border-gray-300" %>
   </div>
-  <div>
+  <div class="contents">
     <%= form.label :width %>
-    <%= form.number_field :width %>
+    <%= form.number_field :width, class: "rounded border-1 ps-1 pe-1 border-gray-300" %>
   </div>
-  <div>
+  <div class="contents">
     <%= form.label :height %>
-    <%= form.number_field :height %>
+    <%= form.number_field :height, class: "rounded border-1 ps-1 pe-1 border-gray-300" %>
   </div>
-  <%= form.submit %>
+  <%= form.submit class: "col-span-full hover:bg-gray-200 hover:cursor-pointer rounded ps-2 pe-2 pt-1 pb-1 bg-gray-300" %>
 <% end %>
