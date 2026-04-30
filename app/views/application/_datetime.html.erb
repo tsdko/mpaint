@@ -4,8 +4,8 @@
   main, sub = sub, main if local_assigns[:relative]
 %>
 <time
-  datetime="<%= datetime %>"
-  <%= "data-is-relative" if local_assigns[:relative] %>
+  datetime="<%= datetime.rfc3339 %>"
+  <%= "data-is-relative=\"true\"" if local_assigns[:relative] %>
   title="<%= sub %>">
     <%= main %>
 </time>
