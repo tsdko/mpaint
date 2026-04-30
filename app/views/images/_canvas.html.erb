@@ -4,7 +4,7 @@
 	<h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
 	<% if readonly %>
 		<div class="mr-2">
-			<%= link_to "Edit", {id: @image, action: :edit}, class: "block bg-gray-300 mt-2 mb-2 p-2 text-center rounded-md" %>
+			<%= link_to "Edit", {id: @image, action: :edit}, class: "block bg-neutral-300 dark:bg-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-400 mt-2 mb-2 p-2 text-center rounded-md" %>
 			<% if @image.last_stroke %>
 				Last edited by <%= link_to @image.last_stroke.participation.user || "名無し" %> <%= render "datetime", datetime: @image.created_at + @image.last_stroke.created_at_delta_secs, relative: true %>
 			<% end %>
@@ -12,26 +12,26 @@
 	<% else %>
 		<div id="canvasTools" class="mr-2">
 			<fieldgroup>
-				<label class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-gray-500">
+				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="brush" checked />
 					✏️
 				</label>
-				<label class="block bg-gray-300 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-gray-500">
+				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="eraser" />
 					🧼
 				</label>
 			</fieldgroup>
 			<input id="colorPicker" type="color" class="block rounded-md" />
 			<div class="relative openableContainer">
-				<a href="#" id="brushSizeButton" class="openableToggle block bg-gray-300 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
-				<div class="openable hidden block bg-gray-300 p-2 rounded-md absolute z-1">
+				<a href="#" id="brushSizeButton" class="openableToggle block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
+				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
 					<input id="brushSize" min="1" max="100" type="range" />
 					<fieldgroup>
-						<label class="rounded-md has-checked:bg-gray-500">
+						<label class="rounded-md bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 							<input class="hidden" name="brushAntialias" type="radio" value="false" checked />
 							🔪
 						</label>
-						<label class="rounded-md has-checked:bg-gray-500">
+						<label class="rounded-md bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 							<input class="hidden" name="brushAntialias" type="radio" value="true" />
 							🧈
 						</label>
@@ -46,7 +46,7 @@
 <!-- TODO: move out-of-line -->
 <style>
 .bg-checkerboard {
-	background: repeating-conic-gradient(var(--color-gray-200) 0 25%, white 0 50%) 50% / 32px 32px;
+	background: repeating-conic-gradient(var(--color-neutral-200) 0 25%, white 0 50%) 50% / 32px 32px;
 }
 </style>
 
