@@ -24,6 +24,10 @@ class ImageChannel < ApplicationCable::Channel
     broadcast_action({action: "leave", pid: @participation.id})
   end
 
+  def pinfo(data)
+    broadcast_action(data)
+  end
+
   def pos(data)
     broadcast_action(data)
   end

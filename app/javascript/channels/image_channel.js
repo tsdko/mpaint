@@ -43,6 +43,13 @@ class CanvasRelay {
     return ev.pressure > 0;
   }
 
+  #onPointerEnter() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      this.perform("pinfo", {pointer_id: ev.pointerId, type: ev.pointerType});
+    };
+  }
+
   #onPointerMove() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => {
@@ -92,6 +99,7 @@ class CanvasRelay {
   }
 
   install(controls) {
+    controls.canvas.addEventListener("pointerenter", this.#onPointerEnter());
     controls.canvas.addEventListener("pointermove", this.#onPointerMove());
     controls.canvas.addEventListener("pointerout", this.#onPointerOut());
     controls.canvas.addEventListener("pointerup", this.#onPointerUpCancel());
@@ -103,6 +111,7 @@ class CanvasRelay {
   }
 
   uninstall(controls) {
+    controls.canvas.removeEventListener("pointerenter", this.#onPointerEnter());
     controls.canvas.removeEventListener("pointermove", this.#onPointerMove());
     controls.canvas.removeEventListener("pointerout", this.#onPointerOut());
     controls.canvas.removeEventListener("pointerup", this.#onPointerUpCancel());
@@ -115,24 +124,42 @@ class CanvasRelay {
 }
 
 class UserCursorManager {
+  #DEVICE_SYMBOLS = {
+    touch: "☝️",
+    mouse: "🖱️",
+    pen: "🖊️",
+    unknown: "❓",
+  }
+
   constructor(canvas, users) {
     this.canvas = canvas;
     this.users = users;
     this.cursors = {};
   }
 
+  #getOrMakeElement(pid, poid) {
+    const cid = pid + "/" + poid;
+    let cur = this.cursors[cid];
+    if(cur)
+      return cur;
+
+    // get the root div so the reference is still alive after calling appendChild
+    cur = document.importNode(document.getElementById("userCursor").content, true)
+                .querySelector("div");
+    cur.querySelector(".userCursorName").textContent = this.users[pid]?.name ?? `名無し＃${pid}`;
+    document.body.appendChild(cur);
+    this.cursors[cid] = cur;
+    return cur;
+  }
+
+  updateDevice(pid, poid, info) {
+    const dev = this.#DEVICE_SYMBOLS[info?.type] || this.#DEVICE_SYMBOLS.unknown;
+    this.#getOrMakeElement(pid, poid).querySelector(".userCursorDevice").textContent = dev;
+  }
+
   show(pid, poid, x, y) {
     const cid = pid + "/" + poid;
-    if(!this.cursors[cid]) {
-      // get the root div so the reference is still alive after calling appendChild
-      const cur = document.importNode(document.getElementById("userCursor").content, true)
-                    .querySelector("div");
-      const curName = (this.users[pid]?.name ?? `名無し＃${pid}`) + "/" + poid;
-      cur.querySelector(".userCursorName").textContent = curName;
-      document.body.appendChild(cur);
-      this.cursors[cid] = cur;
-    }
-    const cur = this.cursors[cid];
+    const cur = this.#getOrMakeElement(pid, poid);
     const r = this.canvas.getBoundingClientRect();
     cur.style.left = window.scrollX + r.left + x + "px";
     cur.style.top = window.scrollY + r.top + y + "px";
@@ -167,6 +194,9 @@ class ServerRelay {
   handleData(data) {
     //console.log("handleData", data);
     switch(data.action) {
+    case "pinfo":
+      this.userCursors.updateDevice(data.pid, data.pointer_id, {type: data.type});
+      break;
     case "pos":
       this.userCursors.show(data.pid, data.pointer_id, data.x, data.y);
       break;

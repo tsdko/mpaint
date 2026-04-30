@@ -55,9 +55,13 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 </script>
 
 <template id="userCursor">
-	<%# -m{t,l}-[3px]: crosshair center at (3, 3), offset so we see the entire thing %>
-	<div class="bg-(image:--white-cross-7) bg-no-repeat absolute -mt-[3px] -ml-[3px] pointer-events-none mix-blend-difference text-white">
-		<div class="userCursorName ps-2"></div>
+	<div class="absolute pointer-events-none">
+		<%# -m{t,l}-[3px]: crosshair center at (3, 3), offset so we see the entire thing %>
+		<div class="bg-(image:--white-cross-7) bg-no-repeat -mt-[3px] -ml-[3px] w-[7px] h-[7px] mix-blend-difference"></div>
+		<div class="ps-2">
+			<span class="userCursorName text-white mix-blend-difference"></span>
+			<span class="userCursorDevice"></span>
+		</div>
 	</div>
 </template>
 	
