@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_04_30_154637) do
+ActiveRecord::Schema[8.1].define(version: 2026_04_30_193241) do
   create_table "image_participations", force: :cascade do |t|
     t.datetime "created_at"
     t.integer "image_id", null: false
@@ -20,7 +20,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_30_154637) do
   end
 
   create_table "image_strokes", force: :cascade do |t|
-    t.string "connection_id"
     t.float "created_at_delta_secs", null: false
     t.json "data", default: [], null: false
     t.integer "image_id", null: false
@@ -34,11 +33,6 @@ ActiveRecord::Schema[8.1].define(version: 2026_04_30_154637) do
     t.string "title"
     t.datetime "updated_at", null: false
     t.integer "width", default: 640, null: false
-  end
-
-  create_table "legacy_image_participations", force: :cascade do |t|
-    t.string "connection_id"
-    t.index ["connection_id"], name: "index_legacy_image_participations_on_connection_id", unique: true
   end
 
   create_table "messages", force: :cascade do |t|
