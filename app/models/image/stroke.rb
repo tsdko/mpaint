@@ -1,5 +1,6 @@
 class Image::Stroke < ApplicationRecord
   belongs_to :image
+  belongs_to :participation, class_name: "Image::Participation"
 
   def empty?
     data.empty?
@@ -18,7 +19,7 @@ class Image::Stroke < ApplicationRecord
   def wire_data
     data.map do |d|
       wd = wire_from_stored(d)
-      wd[1].merge({user_id: connection_id, action: wd[0]})
+      wd[1].merge({pid: participation.id, action: wd[0]})
     end
   end
 

@@ -119,8 +119,8 @@ class UserCursorManager {
     this.cursors = {};
   }
 
-  show(uid, pid, x, y) {
-    const cid = uid + "/" + pid;
+  show(pid, poid, x, y) {
+    const cid = pid + "/" + poid;
     if(!this.cursors[cid]) {
       // get the root div so the reference is still alive after calling appendChild
       const cur = document.importNode(document.getElementById("userCursor").content, true)
@@ -140,12 +140,12 @@ class UserCursorManager {
     delete this.cursors[cid];
   }
 
-  hide(uid, pid) {
-    this.#hideCid(uid + "/" + pid);
+  hide(pid, poid) {
+    this.#hideCid(pid + "/" + poid);
   }
 
-  hideAll(uid) {
-    const toRemove = [...Object.keys(this.cursors).filter(cid => cid.startsWith(uid + "/"))];
+  hideAll(pid) {
+    const toRemove = [...Object.keys(this.cursors).filter(cid => cid.startsWith(pid + "/"))];
     for(const cid of toRemove)
       this.#hideCid(cid);
   }
@@ -155,21 +155,21 @@ class ServerRelay {
   constructor(canvas) {
     this.canvas = canvas;
     this.userCursors = new UserCursorManager(this.canvas);
-    // {uid → {color: string, size: int}}
+    // {pid → {color: string, size: int}}
     this.userBrushes = new Map();
   }
 
   handleData(data) {
-    console.log("handleData", data);
+    //console.log("handleData", data);
     switch(data.action) {
     case "pos":
-      this.userCursors.show(data.user_id, data.pointer_id, data.x, data.y);
+      this.userCursors.show(data.pid, data.pointer_id, data.x, data.y);
       break;
     case "poshide":
       if(data.pointer_id)
-        this.userCursors.hide(data.user_id, data.pointer_id);
+        this.userCursors.hide(data.pid, data.pointer_id);
       else
-        this.userCursors.hideAll(data.user_id);
+        this.userCursors.hideAll(data.pid);
       break;
     case "color":
       for(const comp of "rgb") {
@@ -178,21 +178,21 @@ class ServerRelay {
           return;
         }
       }
-      this.userBrushes.getOrInsert(data.user_id, {}).color = `rgb(${data.r}, ${data.g}, ${data.b})`;
+      this.userBrushes.getOrInsert(data.pid, {}).color = `rgb(${data.r}, ${data.g}, ${data.b})`;
       break;
     case "size":
       if(!Number.isInteger(data.size) || data.size < 0 || data.size > 100) {
         console.error("dropping invalid size", data.size);
         return;
       }
-      this.userBrushes.getOrInsert(data.user_id, {}).size = data.size;
+      this.userBrushes.getOrInsert(data.pid, {}).size = data.size;
       break;
     case "antialias":
-      this.userBrushes.getOrInsert(data.user_id, {}).antialias = data.antialias;
+      this.userBrushes.getOrInsert(data.pid, {}).antialias = data.antialias;
       break;
     case "line":
       const ctx = this.canvas.getContext("2d");
-      const brush = this.userBrushes.get(data.user_id) ?? {};
+      const brush = this.userBrushes.get(data.pid) ?? {};
       ctx.strokeStyle = brush.color ?? "black";
       ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";

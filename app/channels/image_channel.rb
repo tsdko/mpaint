@@ -4,17 +4,18 @@ class ImageChannel < ApplicationCable::Channel
 
     @brush = {}
     @prev_brush = {}
+    @participation = Image::Participation.create(image: @image, user: current_user)
     @strokes = Hash.new do |h, k|
       h[k] = Image::Stroke.new(
         image: @image,
-        connection_id: connection.connection_identifier(),
+        participation: @participation
       )
     end
     stream_for @image
   end
 
   def unsubscribed
-    broadcast_action({action: "poshide", user_id: connection.connection_identifier()})
+    broadcast_action({action: "poshide", pid: @participation.id})
   end
 
   def pos(data)
@@ -63,6 +64,6 @@ class ImageChannel < ApplicationCable::Channel
   private
     def broadcast_action(data)
       # TODO: avoid self-broadcasting if possible, or at least ignore clientside
-      ImageChannel.broadcast_to(@image, data.merge({user_id: connection.connection_identifier()}))
+      ImageChannel.broadcast_to(@image, data.merge({pid: @participation.id}))
     end
 end

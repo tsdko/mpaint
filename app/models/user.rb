@@ -1,6 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
+  has_many :image_participations
   has_many :sent_messages, class_name: "Message", foreign_key: "author_id"
   has_many :received_messages, class_name: "Message", as: :target, dependent: :destroy
 
