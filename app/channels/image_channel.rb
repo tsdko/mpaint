@@ -11,11 +11,17 @@ class ImageChannel < ApplicationCable::Channel
         participation: @participation
       )
     end
+
     stream_for @image
+    join_data = {action: "join", pid: @participation.id}
+    if not current_user.nil?
+      join_data[:user] = {id: @participation.user.id, name: @participation.user.email_address}
+    end
+    broadcast_action(join_data)
   end
 
   def unsubscribed
-    broadcast_action({action: "poshide", pid: @participation.id})
+    broadcast_action({action: "leave", pid: @participation.id})
   end
 
   def pos(data)

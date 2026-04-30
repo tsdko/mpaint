@@ -114,8 +114,9 @@ class CanvasRelay {
 }
 
 class UserCursorManager {
-  constructor(canvas) {
+  constructor(canvas, users) {
     this.canvas = canvas;
+    this.users = users;
     this.cursors = {};
   }
 
@@ -125,7 +126,8 @@ class UserCursorManager {
       // get the root div so the reference is still alive after calling appendChild
       const cur = document.importNode(document.getElementById("userCursor").content, true)
                     .querySelector("div");
-      cur.querySelector(".userCursorName").textContent = cid;
+      const curName = (this.users[pid]?.name ?? `名無し＃${pid}`) + "/" + poid;
+      cur.querySelector(".userCursorName").textContent = curName;
       document.body.appendChild(cur);
       this.cursors[cid] = cur;
     }
@@ -154,7 +156,9 @@ class UserCursorManager {
 class ServerRelay {
   constructor(canvas) {
     this.canvas = canvas;
-    this.userCursors = new UserCursorManager(this.canvas);
+    // {pid → {id: int, name: string}}
+    this.users = {};
+    this.userCursors = new UserCursorManager(this.canvas, this.users);
     // {pid → {color: string, size: int}}
     this.userBrushes = new Map();
   }
@@ -165,6 +169,13 @@ class ServerRelay {
     case "pos":
       this.userCursors.show(data.pid, data.pointer_id, data.x, data.y);
       break;
+    case "join":
+      if(data.user)
+        this.users[data.pid] = data.user;
+      break;
+    case "leave":
+      delete this.users[data.pid];
+      // fallthrough
     case "poshide":
       if(data.pointer_id)
         this.userCursors.hide(data.pid, data.pointer_id);
