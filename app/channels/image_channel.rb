@@ -52,6 +52,11 @@ class ImageChannel < ApplicationCable::Channel
     broadcast_action(data)
   end
 
+  def drawop(data)
+    @brush[:drawop] = data
+    broadcast_action(data)
+  end
+
   def line(data)
     @strokes[data['pointer_id']].push_from_wire(:line, data)
     broadcast_action(data)

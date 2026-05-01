@@ -1,6 +1,8 @@
 import consumer from "channels/consumer";
 
 class CanvasRelay {
+  #DRAWING_TOOLS = new Set([undefined, "brush", "eraser"]);
+
   constructor(canvas, perform) {
     this.perform = perform;
 
@@ -13,7 +15,7 @@ class CanvasRelay {
       return;
     inState.last = {x: inp.x, y: inp.y};
     if(inp.down) {
-      if(inState.lastDown && (!canvas.dataset.tool || canvas.dataset.tool === "brush" || canvas.dataset.tool === "eraser")) {
+      if(inState.lastDown && this.#DRAWING_TOOLS.has(canvas.dataset.tool)) {
         // 1px jaggy brush strokes sometimes disappear with fractional coords
         const aligned = Math.floor;
         const p1 = {
@@ -25,8 +27,6 @@ class CanvasRelay {
           y: aligned(inp.y),
         };
         const line = {pointer_id: inp.id, p1: p1, p2: p2};
-        if(canvas.dataset.tool === "eraser")
-          line.eraser = true;
         this.perform("line", line);
       }
       inState.lastDown = {x: inp.x, y: inp.y};
@@ -68,12 +68,31 @@ class CanvasRelay {
     };
   }
 
+  #onToolChange() {
+    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
+    return ev => {
+      switch(this.canvas.dataset.tool) {
+      case "brush":
+        this.#onColorChange();
+        this.perform("drawop", {drawop: "source-over"});
+        break;
+      case "eraser":
+        this.perform("color", {r: 0, g: 0, b: 0});
+        this.perform("drawop", {drawop: "destination-out"});
+        break;
+      }
+    };
+  }
+
   #onSizeChange() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => this.perform("size", {size: Number.parseFloat(ev.target.value)});
   }
 
   #onColorChange() {
+    if(!this.#DRAWING_TOOLS.has(this.canvas.dataset.tool))
+      return;
+
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 1;
     const ctx = canvas.getContext("2d");
@@ -98,6 +117,7 @@ class CanvasRelay {
     controls.canvas.addEventListener("pointerout", this.#onPointerOut());
     controls.canvas.addEventListener("pointerup", this.#onPointerUpCancel());
     controls.canvas.addEventListener("pointercancel", this.#onPointerUpCancel());
+    controls.toolRadios.forEach(tr => tr.addEventListener("change", this.#onToolChange()));
     controls.picker.addEventListener("change", this.#onColorChange());
     controls.sizeInput.addEventListener("change", this.#onSizeChange());
     controls.antialiasOn.addEventListener("change", this.#onAntialiasChange());
@@ -110,6 +130,7 @@ class CanvasRelay {
     controls.canvas.removeEventListener("pointerout", this.#onPointerOut());
     controls.canvas.removeEventListener("pointerup", this.#onPointerUpCancel());
     controls.canvas.removeEventListener("pointercancel", this.#onPointerUpCancel());
+    controls.toolRadios.forEach(tr => tr.removeEventListener("change", this.#onToolChange()));
     controls.picker.removeEventListener("change", this.#onColorChange());
     controls.sizeInput.removeEventListener("change", this.#onSizeChange());
     controls.antialiasOn.removeEventListener("change", this.#onAntialiasChange());
@@ -226,6 +247,9 @@ class ServerRelay {
     case "antialias":
       this.userBrushes.getOrInsert(data.pid, {}).antialias = data.antialias;
       break;
+    case "drawop":
+      this.userBrushes.getOrInsert(data.pid, {}).drawop = data.drawop;
+      break;
     case "line":
       const ctx = this.canvas.getContext("2d");
       const brush = this.userBrushes.get(data.pid) ?? {};
@@ -233,10 +257,7 @@ class ServerRelay {
       ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";
       ctx.filter = brush.antialias ? "none" : "var(--no-antialias-filter)";
-      ctx.globalCompositeOperation = data.eraser ? "destination-out" : "source-over";
-      if(data.eraser) {
-        ctx.strokeStyle = "black";
-      }
+      ctx.globalCompositeOperation = brush.drawop ?? "source-over";
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);
       ctx.lineTo(data.p2.x, data.p2.y);
@@ -275,6 +296,7 @@ const imageSubscriber = (canvas, serverRelay) => ({
   install() {
     this.relay?.install({
       canvas: this.canvas,
+      toolRadios: document.querySelectorAll("#canvasTools input[type=radio]"),
       picker: document.querySelector("#colorPicker"),
       sizeInput: document.querySelector("#brushSize"),
       antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
@@ -285,6 +307,7 @@ const imageSubscriber = (canvas, serverRelay) => ({
   uninstall() {
     this.relay?.uninstall({
       canvas: this.canvas,
+      toolRadios: document.querySelectorAll("#canvasTools input[type=radio]"),
       picker: document.querySelector("#colorPicker"),
       sizeInput: document.querySelector("#brushSize"),
       antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),

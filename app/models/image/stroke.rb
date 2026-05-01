@@ -28,6 +28,7 @@ class Image::Stroke < ApplicationRecord
       :line => "l",
       :color => "cl",
       :size => "sz",
+      :drawop => "op",
       :antialias => "aal",
       :image => "img",
     }
@@ -40,15 +41,15 @@ class Image::Stroke < ApplicationRecord
           # XXX this still feels quite inefficient, p1/p2 coordinates are usually very close to each other
           #     which means they could probably be delta'd at the very least
           #     (maybe even previous p2 with current p1?)
-          l = [data['p1']['x'], data['p1']['y'], data['p2']['x'], data['p2']['y']]
-          l << 1 if data['eraser']
-          l
+          [data['p1']['x'], data['p1']['y'], data['p2']['x'], data['p2']['y']]
         when :color
           [data['r'], data['g'], data['b']]
         when :size
           [data['size']]
         when :antialias
           [data['antialias']]
+        when :drawop
+          [data['drawop']]
         else
           raise "unsupported wire type #{t}"
         end
@@ -61,14 +62,14 @@ class Image::Stroke < ApplicationRecord
         case [st, *data[1..]]
         in [:line, x1, y1, x2, y2]
           {p1: {x: x1, y: y1}, p2: {x: x2, y: y2}}
-        in [:line, x1, y1, x2, y2, eraser]
-          {p1: {x: x1, y: y1}, p2: {x: x2, y: y2}, eraser: !!eraser}
         in [:color, r, g, b]
           {r: r, g: g, b: b}
         in [:size, s]
           {size: s}
         in [:antialias, a]
           {antialias: a}
+        in [:drawop, o]
+          {drawop: o}
         in [:image, d]
           {data: d}
         else
