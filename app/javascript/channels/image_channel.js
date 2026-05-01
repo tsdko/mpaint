@@ -156,6 +156,8 @@ class ParticipantCursorManager {
     // get the root div so the reference is still alive after calling appendChild
     cur = document.importNode(document.getElementById("userCursor").content, true)
                 .querySelector("div");
+    // unhide only after we have the position
+    cur.classList.add("hidden");
     cur.querySelector(".userCursorName").textContent = this.participants.get(pid)?.name ?? `名無し＃${pid}`;
     document.body.appendChild(cur);
     let curs = this.userCursors[pid];
@@ -176,6 +178,7 @@ class ParticipantCursorManager {
     const r = this.canvas.getBoundingClientRect();
     cur.style.left = window.scrollX + r.left + x + "px";
     cur.style.top = window.scrollY + r.top + y + "px";
+    cur.classList.remove("hidden");
   }
 
   brushUpdatedAll(pid) {
