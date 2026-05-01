@@ -50,7 +50,7 @@ class CanvasRelay {
           x: aligned(inp.x),
           y: aligned(inp.y),
         };
-        const line = {pointer_id: inp.id, p1: p1, p2: p2};
+        const line = {p1: p1, p2: p2};
         this.perform("line", line);
       }
       inState.lastDown = {x: inp.x, y: inp.y};
@@ -216,41 +216,33 @@ class ServerRelay {
   }
 
   handleData(data) {
-    //console.log("handleData", data);
-    switch(data.action) {
+    if(data.action !== "cmd") {
+      switch(data.action) {
+      case "join":
+        if(data.user)
+          Object.assign(this.#getParticipant(data.pid), data.user);
+        return;
+      case "leave":
+        this.participants.delete(data.pid);
+        this.cursors.hideAll(data.pid);
+        return;
+      }
+    }
+
+    switch(data.t) {
     case "pinfo":
       this.cursors.updateDevice(data.pid, data.pointer_id, {type: data.type});
       break;
     case "pos":
       this.cursors.show(data.pid, data.pointer_id, data.x, data.y);
       break;
-    case "join":
-      if(data.user)
-        Object.assign(this.#getParticipant(data.pid), data.user);
-      break;
-    case "leave":
-      this.participants.delete(data.pid);
-      // fallthrough
     case "poshide":
-      if(data.pointer_id)
-        this.cursors.hide(data.pid, data.pointer_id);
-      else
-        this.cursors.hideAll(data.pid);
+      this.cursors.hide(data.pid, data.pointer_id);
       break;
     case "color":
-      for(const comp of "rgb") {
-        if(!Number.isInteger(data[comp]) || data[comp] < 0 || data[comp] > 0xff) {
-          console.error("dropping invalid", comp, data[comp]);
-          return;
-        }
-      }
       this.#getParticipant(data.pid).brush.color = `rgb(${data.r}, ${data.g}, ${data.b})`;
       break;
     case "size":
-      if(!Number.isInteger(data.size) || data.size < 0 || data.size > 100) {
-        console.error("dropping invalid size", data.size);
-        return;
-      }
       this.#getParticipant(data.pid).brush.size = data.size;
       this.cursors.brushUpdatedAll(data.pid);
       break;
@@ -289,7 +281,7 @@ const imageSubscriber = (canvas, serverRelay) => ({
   initialized() {
     this.canvas = document.getElementById("imageCanvas");
     if(!this.canvas.dataset.readonly)
-      this.relay = new CanvasRelay(document, (action, params) => this.perform(action, params));
+      this.relay = new CanvasRelay(document, (action, params) => this.perform("cmd", {t: action, ...params}));
     this.serverRelay = serverRelay;
   },
 

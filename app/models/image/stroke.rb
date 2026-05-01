@@ -19,7 +19,7 @@ class Image::Stroke < ApplicationRecord
   def wire_data
     data.map do |d|
       wd = wire_from_stored(d)
-      wd[1].merge({pid: participation.id, action: wd[0]})
+      wd[1].merge({pid: participation.id, t: wd[0]})
     end
   end
 

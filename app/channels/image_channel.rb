@@ -1,4 +1,7 @@
 class ImageChannel < ApplicationCable::Channel
+  BRUSH_UPDATE_CMDS = Set[:size, :antialias, :color, :drawop]
+  SILENT_CMDS = Set[:endstroke]
+
   def subscribed
     @image = Image.find(params[:id])
 
@@ -24,56 +27,44 @@ class ImageChannel < ApplicationCable::Channel
     broadcast_action({action: "leave", pid: @participation.id})
   end
 
-  def pinfo(data)
-    broadcast_action(data)
+  def cmd(data)
+    data.delete("action")
+    t = data.delete("t")
+    ct = t.camelize
+    out_obj = CanvasCommand.const_get(ct).new(**data)
+
+    out_data = out_obj.instance_values
+    ts = t.to_sym
+
+    begin
+      send("cmd_#{t}", out_data)
+    rescue NoMethodError
+    end
+
+    if BRUSH_UPDATE_CMDS.include? ts
+      @brush[t.to_sym] = out_data
+    end
+
+    unless SILENT_CMDS.include? ts
+      broadcast_action({action: "cmd", t: t, **out_data})
+    end
   end
 
-  def pos(data)
-    broadcast_action(data)
+  def cmd_line(data)
+    @strokes[data[:pointer_id]].push_from_wire(:line, data)
   end
 
-  def poshide(data)
-    endstroke(data)
-    broadcast_action(data)
-  end
-
-  def size(data)
-    @brush[:size] = data
-    broadcast_action(data)
-  end
-
-  def antialias(data)
-    @brush[:antialias] = data
-    broadcast_action(data)
-  end
-
-  def color(data)
-    @brush[:color] = data
-    broadcast_action(data)
-  end
-
-  def drawop(data)
-    @brush[:drawop] = data
-    broadcast_action(data)
-  end
-
-  def line(data)
-    @strokes[data['pointer_id']].push_from_wire(:line, data)
-    broadcast_action(data)
-  end
-
-  def endstroke(data)
-    stroke = @strokes.delete(data['pointer_id'])
+  def cmd_endstroke(data)
+    stroke = @strokes.delete(data[:pointer_id])
     return if stroke.nil? || stroke.empty?
 
     stroke.add_brush_delta(
       @prev_brush.reject { |k, v| @brush[k] == v }.merge!(@brush.reject{ |k, _| @prev_brush.key?(k) })
     )
-    # TODO: how do you check for errors here?
     @image.strokes << stroke
     @prev_brush = @brush
     @brush = {}
-    # TODO: return error if there was one?
+    # TODO: pass .errors if present? maybe via a private user-specific channel
   end
 
   private
