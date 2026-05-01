@@ -1,4 +1,5 @@
 import consumer from "channels/consumer";
+import * as Util from "util";
 
 class CanvasRelay {
   #DRAWING_TOOLS = new Set([undefined, "brush", "eraser"]);
@@ -195,7 +196,7 @@ class ParticipantCursorManager {
   #brushUpdated(pid, poid) {
     const brush = this.participants.get(pid)?.brush;
     const cur = this.userCursors[pid][poid];
-    cur.querySelector(".cursorPointer").style.filter = brush?.antialias ? "none" : "var(--no-antialias-filter)";
+    cur.querySelector(".cursorPointer").style.filter = brush?.antialias ? "none" : Util.noAntialiasFilter;
     cur.querySelector(".cursorCircle").setAttribute("r", (brush?.size ?? 1)/2 + "px");
   }
 
@@ -269,7 +270,7 @@ export class ServerRelay {
       ctx.strokeStyle = brush.color ?? "black";
       ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";
-      ctx.filter = brush.antialias ? "none" : "var(--no-antialias-filter)";
+      ctx.filter = brush.antialias ? "none" : Util.noAntialiasFilter;
       ctx.globalCompositeOperation = brush.drawop ?? "source-over";
       ctx.beginPath();
       ctx.moveTo(data.p1.x, data.p1.y);

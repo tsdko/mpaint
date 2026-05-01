@@ -28,3 +28,7 @@ export const rgbaFromCSS = (() => {
     return [...ctx.getImageData(0, 0, 1, 1).data];
   };
 })();
+
+// setting canvas ctx.filter to a var(…) value is not well-supported across browsers
+// this is the alternative
+export const noAntialiasFilter = window.getComputedStyle(document.body).getPropertyValue("--no-antialias-filter");

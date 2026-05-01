@@ -1,4 +1,5 @@
 import * as ImageChannel from "channels/image_channel";
+import * as Util from "util";
 
 // image canvas UI code
 // all the network logic lives in image_channel as of now
@@ -55,7 +56,7 @@ function openableSetup() {
 
 function canvasFilterSetup() {
   document.querySelectorAll("#imageCanvas, #brushSizeCanvas").forEach(canvas => {
-    canvas.getContext("2d").filter = "var(--no-antialias-filter)";
+    canvas.getContext("2d").filter = Util.noAntialiasFilter;
   });
 }
 
@@ -94,11 +95,11 @@ function canvasDrawSetup() {
 
   // brush jaggy
   document.querySelectorAll("input[name=brushAntialias]").forEach(el => el.addEventListener("input", ev => {
-    drawBrushSample(brushSizeCanvas, {filter: el.value === "true" ? "none" : "var(--no-antialias-filter)"});
+    drawBrushSample(brushSizeCanvas, {filter: el.value === "true" ? "none" : Util.noAntialiasFilter});
   }));
 
   const brushSampleDefaults = {
-    filter: "var(--no-antialias-filter)",
+    filter: Util.noAntialiasFilter,
     lineWidth: Number.parseFloat(document.querySelector("#brushSize").value),
     lineCap: "round",
     strokeStyle: "black",
