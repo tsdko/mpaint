@@ -104,7 +104,7 @@ class CanvasRelay {
   }
 
   #onAntialiasChange(ev) {
-    this.perform("antialias", {antialias: e.target.value === "true"})
+    this.perform("antialias", {antialias: ev.target.value === "true"})
   }
 
   #setupEventListeners(op) {
