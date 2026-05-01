@@ -172,8 +172,15 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 		const sRelay = new ServerRelay(canvas);
 		fetch("<%= url_for :controller => "image_strokes", :image_id => @image.id, :format => :json %>")
 			.then(r => r.json())
-			.then(j => j.forEach(ds => ds.forEach(d => sRelay.handleData(d))))
-			.then(() => {
+			.then(j => {
+				const pids = new Set();
+				j.forEach(ds => ds.forEach(d => {
+					if(d.pid)
+						pids.add(d.pid);
+					sRelay.handleData(d)
+				}));
+				pids.forEach(pid => sRelay.handleData({action: "leave", pid: pid}));
+			}).then(() => {
 				canvas.classList.remove("brightness-50");
 				imageSubscribe(<%= @image.id %>, canvas, sRelay);
 			});
