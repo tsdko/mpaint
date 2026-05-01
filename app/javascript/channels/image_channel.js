@@ -4,18 +4,19 @@ class CanvasRelay {
   #DRAWING_TOOLS = new Set([undefined, "brush", "eraser"]);
 
   #CANVAS_SEL = "#imageCanvas";
+  #PICKER_SEL = "#colorPicker";
   #LISTENERS = {
     [this.#CANVAS_SEL]: [
-      ["pointerenter", this.#onPointerEnter()],
-      ["pointermove", this.#onPointerMove()],
-      ["pointerout", this.#onPointerOut()],
-      ["pointerup", this.#onPointerUpCancel()],
-      ["pointercancel", this.#onPointerUpCancel()],
+      ["pointerenter", this.#onPointerEnter],
+      ["pointermove", this.#onPointerMove],
+      ["pointerout", this.#onPointerOut],
+      ["pointerup", this.#onPointerUpCancel],
+      ["pointercancel", this.#onPointerUpCancel],
     ],
-    "input[type=radio][name=tool]": [["change", this.#onToolChange()]],
-    "#colorPicker": [["change", this.#onColorChange()]],
-    "#brushSize": [["change", this.#onSizeChange()]],
-    "input[type=radio][name=brushAntialias]": [["change", this.#onAntialiasChange()]],
+    "input[type=radio][name=tool]": [["change", this.#onToolChange]],
+    [this.#PICKER_SEL]: [["change", this.#onColorChange]],
+    "#brushSize": [["change", this.#onSizeChange]],
+    "input[type=radio][name=brushAntialias]": [["change", this.#onAntialiasChange]],
   }
 
   constructor(rootElem, perform) {
@@ -24,6 +25,13 @@ class CanvasRelay {
     this.rootElem = rootElem;
     this.canvas = this.rootElem.querySelector(this.#CANVAS_SEL);
     this.pointers = new Map();
+
+    // ensure all listeners can access the relay via `this`
+    for(const ls of Object.values(this.#LISTENERS)) {
+      for(const l of ls) {
+        l[1] = l[1].bind(this);
+      }
+    }
   }
 
   #onPosInput(inState, inp) {
@@ -52,76 +60,51 @@ class CanvasRelay {
     this.perform("pos", {pointer_id: inp.id, x: inp.x, y: inp.y});
   }
 
-  #onPointerEnter() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      this.perform("pinfo", {pointer_id: ev.pointerId, type: ev.pointerType});
-    };
+  #onPointerEnter(ev) {
+    this.perform("pinfo", {pointer_id: ev.pointerId, type: ev.pointerType});
   }
 
-  #onPointerMove() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      const inState = this.pointers.getOrInsert(ev.pointerId, {});
-      const [x, y] = Util.localPos(ev, this.canvas);
-      this.#onPosInput(inState, {id: ev.pointerId, x: x, y: y, down: Util.pointerIsDown(ev)});
-    };
+  #onPointerMove(ev) {
+    const inState = this.pointers.getOrInsert(ev.pointerId, {});
+    const [x, y] = Util.localPos(ev, this.canvas);
+    this.#onPosInput(inState, {id: ev.pointerId, x: x, y: y, down: Util.pointerIsDown(ev)});
   }
 
-  #onPointerOut() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      this.perform("poshide", {pointer_id: ev.pointerId});
-      this.pointers.delete(ev.pointerId);
-    };
+  #onPointerOut(ev) {
+    this.perform("poshide", {pointer_id: ev.pointerId});
+    this.pointers.delete(ev.pointerId);
   }
 
-  #onPointerUpCancel() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      console.log("pointer up or cancel", ev);
-      this.perform("endstroke", {pointer_id: ev.pointerId});
-    };
+  #onPointerUpCancel(ev) {
+    this.perform("endstroke", {pointer_id: ev.pointerId});
   }
 
-  #onToolChange() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => {
-      switch(this.canvas.dataset.tool) {
-      case "brush":
-        this.#onColorChange();
-        this.perform("drawop", {drawop: "source-over"});
-        break;
-      case "eraser":
-        this.perform("color", {r: 0, g: 0, b: 0});
-        this.perform("drawop", {drawop: "destination-out"});
-        break;
-      }
-    };
-  }
-
-  #onSizeChange() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return ev => this.perform("size", {size: Number.parseFloat(ev.target.value)});
-  }
-
-  #onColorChange() {
-    const canvas = document.createElement("canvas");
-    canvas.width = canvas.height = 1;
-    const ctx = canvas.getContext("2d");
-    return ev => {
-      ctx.fillStyle = ev.target.value;
-      ctx.fillRect(0, 0, 1, 1);
-      const rgba = [...ctx.getImageData(0, 0, 1, 1).data];
+  #onToolChange(ev) {
+    switch(this.canvas.dataset.tool) {
+    case "brush":
+      const picker = document.querySelector(this.#PICKER_SEL);
+      const rgba = Util.rgbaFromCSS(picker.value);
       this.perform("color", {r: rgba[0], g: rgba[1], b: rgba[2]});
-    };
+      this.perform("drawop", {drawop: "source-over"});
+      break;
+    case "eraser":
+      this.perform("color", {r: 0, g: 0, b: 0});
+      this.perform("drawop", {drawop: "destination-out"});
+      break;
+    }
   }
 
-  #onAntialiasChange() {
-    // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
-    return e => {
-      this.perform("antialias", {antialias: e.target.value === "true"})
-    };
+  #onSizeChange(ev) {
+    this.perform("size", {size: Number.parseFloat(ev.target.value)});
+  }
+
+  #onColorChange(ev) {
+    const rgba = Util.rgbaFromCSS(ev.target.value);
+    this.perform("color", {r: rgba[0], g: rgba[1], b: rgba[2]});
+  }
+
+  #onAntialiasChange(ev) {
+    this.perform("antialias", {antialias: e.target.value === "true"})
   }
 
   #setupEventListeners(op) {
