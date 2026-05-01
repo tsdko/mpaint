@@ -31,7 +31,7 @@
 			<div class="relative openableContainer">
 				<a href="#" id="brushSizeButton" class="openableToggle block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
 				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
-					<input id="brushSize" min="1" max="100" type="range" />
+					<input id="brushSize" min="1" max="100" value="1" type="range" />
 					<fieldgroup>
 						<label class="rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 							<input class="hidden" name="brushAntialias" type="radio" value="false" checked />
@@ -164,7 +164,16 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 	document.querySelectorAll("input[name=brushAntialias]").forEach(el => el.addEventListener("input", ev => {
 		drawBrushSample(brushSizeCanvas, {filter: el.value === "true" ? "none" : "var(--no-antialias-filter)"});
 	}));
+
 	drawBrushSample(brushSizeCanvas, brushSampleDefaults);
+
+	// reset input state in case the browser remembered it
+	document.querySelectorAll("input[type=radio]").forEach(el => {
+		el.checked = el.hasAttribute("checked");
+	});
+	document.querySelectorAll("input[type=color]").forEach(el => {
+		el.value = el.getAttribute("value");
+	});
 	</script>
 <% end %>
 
