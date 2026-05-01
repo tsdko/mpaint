@@ -1,4 +1,4 @@
 <div class="rounded-md bg-neutral-300 dark:bg-neutral-500 p-4 m-4">
   <div class="font-medium"><%= link_to image %></div>
-  <div><%= render "datetime", datetime: image.created_at %></div>
+  <div><%= time_tag image.created_at %></div>
 </div>
