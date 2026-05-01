@@ -20,6 +20,10 @@
 					<input class="hidden" name="tool" type="radio" value="eraser" />
 					🧼
 				</label>
+				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+					<input class="hidden" name="tool" type="radio" value="eyedropper" />
+					👁️
+				</label>
 			</fieldgroup>
 			<input id="colorPicker" type="color" class="block rounded-md" />
 			<div class="relative openableContainer">
@@ -125,18 +129,38 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 	});
 
 	const canvas = document.getElementById('imageCanvas');
-	canvas.addEventListener("mousedown", e => console.log("mousedown", e));
-	canvas.addEventListener("mouseup", e => console.log("mouseup", e));
+
+	// all tools
+	document.querySelectorAll("input[name=tool]").forEach(el => el.addEventListener("input", ev => {
+		document.getElementById("imageCanvas").dataset.tool = ev.target.value;
+	}));
+
+	// eyedropper
+	function pickCanvasColor(ev) {
+		if(canvas.dataset.tool !== "eyedropper" || !Util.pointerIsDown(ev))
+			return;
+		const [x, y] = Util.localPos(ev, canvas);
+		const [r, g, b, a] = canvas.getContext("2d").getImageData(Math.round(x), Math.round(y), 1, 1).data;
+		colorPicker.value = `rgb(${r}, ${g}, ${b})`;
+	}
+	canvas.addEventListener("pointerdown", ev => pickCanvasColor(ev));
+	canvas.addEventListener("pointermove", ev => pickCanvasColor(ev));
+	canvas.addEventListener("pointerup", e => {
+		if(canvas.dataset.tool !== "eyedropper")
+			return;
+		colorPicker.dispatchEvent(new Event("change"));
+	});
+
+	// brush size
 	document.getElementById("brushSize").addEventListener("input", e => {
 		drawBrushSample(brushSizeCanvas, {lineWidth: e.target.value});
 	});
+
+	// brush jaggy
 	document.querySelectorAll("input[name=brushAntialias]").forEach(el => el.addEventListener("input", ev => {
 		drawBrushSample(brushSizeCanvas, {filter: el.value === "true" ? "none" : "var(--no-antialias-filter)"});
 	}));
 	drawBrushSample(brushSizeCanvas, brushSampleDefaults);
-	document.querySelectorAll("input[name=tool]").forEach(el => el.addEventListener("input", ev => {
-		document.getElementById("imageCanvas").dataset.tool = ev.target.value;
-	}));
 	</script>
 <% end %>
 

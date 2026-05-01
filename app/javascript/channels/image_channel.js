@@ -14,7 +14,7 @@ class CanvasRelay {
     inState.last = {cx: inp.cx, cy: inp.cy};
     const r = this.canvas.getBoundingClientRect();
     if(inp.down) {
-      if(inState.lastDown) {
+      if(inState.lastDown && (!canvas.dataset.tool || canvas.dataset.tool === "brush" || canvas.dataset.tool === "eraser")) {
         // 1px jaggy brush strokes sometimes disappear with fractional coords
         const aligned = Math.floor;
         const p1 = {
@@ -37,12 +37,6 @@ class CanvasRelay {
     this.perform("pos", {pointer_id: inp.id, x: inp.cx - r.left, y: inp.cy - r.top});
   }
 
-  #isDown(ev) {
-    if(ev.pointerType === "mouse")
-      return ev.buttons & 1;
-    return ev.pressure > 0;
-  }
-
   #onPointerEnter() {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => {
@@ -54,7 +48,7 @@ class CanvasRelay {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => {
       const inState = this.pointers.getOrInsert(ev.pointerId, {});
-      this.#onPosInput(inState, {id: ev.pointerId, cx: ev.clientX, cy: ev.clientY, down: this.#isDown(ev)});
+      this.#onPosInput(inState, {id: ev.pointerId, cx: ev.clientX, cy: ev.clientY, down: Util.pointerIsDown(ev)});
     };
   }
 
