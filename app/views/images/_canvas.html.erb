@@ -12,17 +12,17 @@
 	<% else %>
 		<div id="canvasTools" class="mr-2">
 			<fieldgroup>
-				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="brush" checked />
-					✏️
+					<%= svg_icon "pencil" %>
 				</label>
-				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="eraser" />
-					🧼
+					<%= svg_icon "eraser" %>
 				</label>
-				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="eyedropper" />
-					👁️
+					<%= svg_icon "eye-dropper" %>
 				</label>
 			</fieldgroup>
 			<input id="colorPicker" type="color" class="block rounded-md" />
@@ -31,13 +31,13 @@
 				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
 					<input id="brushSize" min="1" max="100" type="range" />
 					<fieldgroup>
-						<label class="rounded-md bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+						<label class="rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 							<input class="hidden" name="brushAntialias" type="radio" value="false" checked />
-							🔪
+							<%= svg_icon "slash", class: "filter-(--no-antialias-filter)" %>
 						</label>
-						<label class="rounded-md bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+						<label class="rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 bg-neutral-300 dark:bg-neutral-500 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 							<input class="hidden" name="brushAntialias" type="radio" value="true" />
-							🧈
+							<%= svg_icon "slash" %>
 						</label>
 					</fieldgroup>
 				</div>
