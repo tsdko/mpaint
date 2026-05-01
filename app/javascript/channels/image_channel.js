@@ -134,7 +134,7 @@ class CanvasRelay {
   }
 }
 
-class UserCursorManager {
+class ParticipantCursorManager {
   #DEVICE_SYMBOLS = {
     touch: "☝️",
     mouse: "🖱️",
@@ -142,10 +142,9 @@ class UserCursorManager {
     unknown: "❓",
   }
 
-  constructor(canvas, users, userBrushes) {
+  constructor(canvas, participants) {
     this.canvas = canvas;
-    this.users = users;
-    this.userBrushes = userBrushes;
+    this.participants = participants;
     this.userCursors = {};
   }
 
@@ -157,7 +156,7 @@ class UserCursorManager {
     // get the root div so the reference is still alive after calling appendChild
     cur = document.importNode(document.getElementById("userCursor").content, true)
                 .querySelector("div");
-    cur.querySelector(".userCursorName").textContent = this.users[pid]?.name ?? `名無し＃${pid}`;
+    cur.querySelector(".userCursorName").textContent = this.participants.get(pid)?.name ?? `名無し＃${pid}`;
     document.body.appendChild(cur);
     let curs = this.userCursors[pid];
     if(!curs)
@@ -185,7 +184,7 @@ class UserCursorManager {
   }
 
   #sizeUpdated(pid, poid) {
-    const size = this.userBrushes.get(pid)?.size || 1;
+    const size = this.participants.get(pid)?.brush?.size || 1;
     this.userCursors[pid][poid].querySelector(".cursorCircle").setAttribute("r", size/2 + "px");
   }
 
@@ -205,34 +204,36 @@ class UserCursorManager {
 class ServerRelay {
   constructor(canvas) {
     this.canvas = canvas;
-    // {pid → {id: int, name: string}}
-    this.users = {};
-    // {pid → {color: string, size: int}}
-    this.userBrushes = new Map();
-    this.userCursors = new UserCursorManager(this.canvas, this.users, this.userBrushes);
+    // {pid → {id: int?, name: string?, brush: {...}}}
+    this.participants = new Map();
+    this.cursors = new ParticipantCursorManager(this.canvas, this.participants);
+  }
+
+  #getParticipant(pid) {
+    return this.participants.getOrInsertComputed(pid, () => ({brush: {}}));
   }
 
   handleData(data) {
     //console.log("handleData", data);
     switch(data.action) {
     case "pinfo":
-      this.userCursors.updateDevice(data.pid, data.pointer_id, {type: data.type});
+      this.cursors.updateDevice(data.pid, data.pointer_id, {type: data.type});
       break;
     case "pos":
-      this.userCursors.show(data.pid, data.pointer_id, data.x, data.y);
+      this.cursors.show(data.pid, data.pointer_id, data.x, data.y);
       break;
     case "join":
       if(data.user)
-        this.users[data.pid] = data.user;
+        Object.assign(this.#getParticipant(data.pid), data.user);
       break;
     case "leave":
-      delete this.users[data.pid];
+      this.participants.delete(data.pid);
       // fallthrough
     case "poshide":
       if(data.pointer_id)
-        this.userCursors.hide(data.pid, data.pointer_id);
+        this.cursors.hide(data.pid, data.pointer_id);
       else
-        this.userCursors.hideAll(data.pid);
+        this.cursors.hideAll(data.pid);
       break;
     case "color":
       for(const comp of "rgb") {
@@ -241,25 +242,25 @@ class ServerRelay {
           return;
         }
       }
-      this.userBrushes.getOrInsert(data.pid, {}).color = `rgb(${data.r}, ${data.g}, ${data.b})`;
+      this.#getParticipant(data.pid).brush.color = `rgb(${data.r}, ${data.g}, ${data.b})`;
       break;
     case "size":
       if(!Number.isInteger(data.size) || data.size < 0 || data.size > 100) {
         console.error("dropping invalid size", data.size);
         return;
       }
-      this.userBrushes.getOrInsert(data.pid, {}).size = data.size;
-      this.userCursors.sizeUpdatedAll(data.pid);
+      this.#getParticipant(data.pid).brush.size = data.size;
+      this.cursors.sizeUpdatedAll(data.pid);
       break;
     case "antialias":
-      this.userBrushes.getOrInsert(data.pid, {}).antialias = data.antialias;
+      this.#getParticipant(data.pid).brush.antialias = data.antialias;
       break;
     case "drawop":
-      this.userBrushes.getOrInsert(data.pid, {}).drawop = data.drawop;
+      this.#getParticipant(data.pid).brush.drawop = data.drawop;
       break;
     case "line":
       const ctx = this.canvas.getContext("2d");
-      const brush = this.userBrushes.get(data.pid) ?? {};
+      const brush = this.#getParticipant(data.pid)?.brush ?? {};
       ctx.strokeStyle = brush.color ?? "black";
       ctx.lineWidth = brush.size ?? 1;
       ctx.lineCap = "round";
