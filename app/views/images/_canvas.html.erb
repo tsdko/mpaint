@@ -60,8 +60,10 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 
 <template id="userCursor">
 	<div class="absolute pointer-events-none">
-		<%# -m{t,l}-[3px]: crosshair center at (3, 3), offset so we see the entire thing %>
-		<div class="bg-(image:--white-cross-7) bg-no-repeat -mt-[3px] -ml-[3px] w-[7px] h-[7px] mix-blend-difference"></div>
+		<svg class="mix-blend-difference overflow-visible" width="1" height="1" xmlns="http://www.w3.org/2000/svg">
+			<circle class="cursorCircle" stroke="currentColor" fill="none" r="7.5px" />
+			<path class="cursorCross" stroke="none" d="M-7 0H7ZM0-7V7Z" />
+		</svg>
 		<div class="ps-2">
 			<span class="userCursorName text-white mix-blend-difference"></span>
 			<span class="userCursorDevice"></span>

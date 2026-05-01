@@ -142,15 +142,15 @@ class UserCursorManager {
     unknown: "❓",
   }
 
-  constructor(canvas, users) {
+  constructor(canvas, users, userBrushes) {
     this.canvas = canvas;
     this.users = users;
-    this.cursors = {};
+    this.userBrushes = userBrushes;
+    this.userCursors = {};
   }
 
   #getOrMakeElement(pid, poid) {
-    const cid = pid + "/" + poid;
-    let cur = this.cursors[cid];
+    let cur = (this.userCursors[pid] ?? {})[poid];
     if(cur)
       return cur;
 
@@ -159,7 +159,11 @@ class UserCursorManager {
                 .querySelector("div");
     cur.querySelector(".userCursorName").textContent = this.users[pid]?.name ?? `名無し＃${pid}`;
     document.body.appendChild(cur);
-    this.cursors[cid] = cur;
+    let curs = this.userCursors[pid];
+    if(!curs)
+      curs = this.userCursors[pid] = {};
+    curs[poid] = cur;
+    this.#sizeUpdated(pid, poid);
     return cur;
   }
 
@@ -169,26 +173,32 @@ class UserCursorManager {
   }
 
   show(pid, poid, x, y) {
-    const cid = pid + "/" + poid;
     const cur = this.#getOrMakeElement(pid, poid);
     const r = this.canvas.getBoundingClientRect();
     cur.style.left = window.scrollX + r.left + x + "px";
     cur.style.top = window.scrollY + r.top + y + "px";
   }
 
-  #hideCid(cid) {
-    this.cursors[cid]?.remove();
-    delete this.cursors[cid];
+  sizeUpdatedAll(pid) {
+    for(const poid of Object.keys(this.userCursors[pid] ?? {}))
+      this.#sizeUpdated(pid, poid);
+  }
+
+  #sizeUpdated(pid, poid) {
+    const size = this.userBrushes.get(pid)?.size || 1;
+    this.userCursors[pid][poid].querySelector(".cursorCircle").setAttribute("r", size/2 + "px");
   }
 
   hide(pid, poid) {
-    this.#hideCid(pid + "/" + poid);
+    this.userCursors[pid][poid].remove();
+    delete this.userCursors[pid][poid];
   }
 
   hideAll(pid) {
-    const toRemove = [...Object.keys(this.cursors).filter(cid => cid.startsWith(pid + "/"))];
-    for(const cid of toRemove)
-      this.#hideCid(cid);
+    const cursors = this.userCursors[pid] ?? {};
+    this.userCursors[pid] = {};
+    for(const cur of Object.values(cursors))
+      cur.remove();
   }
 }
 
@@ -197,9 +207,9 @@ class ServerRelay {
     this.canvas = canvas;
     // {pid → {id: int, name: string}}
     this.users = {};
-    this.userCursors = new UserCursorManager(this.canvas, this.users);
     // {pid → {color: string, size: int}}
     this.userBrushes = new Map();
+    this.userCursors = new UserCursorManager(this.canvas, this.users, this.userBrushes);
   }
 
   handleData(data) {
@@ -239,6 +249,7 @@ class ServerRelay {
         return;
       }
       this.userBrushes.getOrInsert(data.pid, {}).size = data.size;
+      this.userCursors.sizeUpdatedAll(data.pid);
       break;
     case "antialias":
       this.userBrushes.getOrInsert(data.pid, {}).antialias = data.antialias;
