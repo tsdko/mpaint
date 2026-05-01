@@ -3,10 +3,26 @@ import consumer from "channels/consumer";
 class CanvasRelay {
   #DRAWING_TOOLS = new Set([undefined, "brush", "eraser"]);
 
-  constructor(canvas, perform) {
+  #CANVAS_SEL = "#imageCanvas";
+  #LISTENERS = {
+    [this.#CANVAS_SEL]: [
+      ["pointerenter", this.#onPointerEnter()],
+      ["pointermove", this.#onPointerMove()],
+      ["pointerout", this.#onPointerOut()],
+      ["pointerup", this.#onPointerUpCancel()],
+      ["pointercancel", this.#onPointerUpCancel()],
+    ],
+    "input[type=radio][name=tool]": [["change", this.#onToolChange()]],
+    "#colorPicker": [["change", this.#onColorChange()]],
+    "#brushSize": [["change", this.#onSizeChange()]],
+    "input[type=radio][name=brushAntialias]": [["change", this.#onAntialiasChange()]],
+  }
+
+  constructor(rootElem, perform) {
     this.perform = perform;
 
-    this.canvas = canvas;
+    this.rootElem = rootElem;
+    this.canvas = this.rootElem.querySelector(this.#CANVAS_SEL);
     this.pointers = new Map();
   }
 
@@ -90,9 +106,6 @@ class CanvasRelay {
   }
 
   #onColorChange() {
-    if(!this.#DRAWING_TOOLS.has(this.canvas.dataset.tool))
-      return;
-
     const canvas = document.createElement("canvas");
     canvas.width = canvas.height = 1;
     const ctx = canvas.getContext("2d");
@@ -111,30 +124,30 @@ class CanvasRelay {
     };
   }
 
-  install(controls) {
-    controls.canvas.addEventListener("pointerenter", this.#onPointerEnter());
-    controls.canvas.addEventListener("pointermove", this.#onPointerMove());
-    controls.canvas.addEventListener("pointerout", this.#onPointerOut());
-    controls.canvas.addEventListener("pointerup", this.#onPointerUpCancel());
-    controls.canvas.addEventListener("pointercancel", this.#onPointerUpCancel());
-    controls.toolRadios.forEach(tr => tr.addEventListener("change", this.#onToolChange()));
-    controls.picker.addEventListener("change", this.#onColorChange());
-    controls.sizeInput.addEventListener("change", this.#onSizeChange());
-    controls.antialiasOn.addEventListener("change", this.#onAntialiasChange());
-    controls.antialiasOff.addEventListener("change", this.#onAntialiasChange());
+  #setupEventListeners(op) {
+    if(op !== "add" && op !== "remove")
+      throw `unsupported event listener setup operation: ${op}`;
+
+    const listeners = Object.entries(this.#LISTENERS)
+                       .map(([sel, ls]) => [sel, ls, this.rootElem.querySelectorAll(sel)]);
+    for(const [sel, ls, elems] of listeners) {
+      if(elems.length < 1)
+        throw `required element(s) not found: ${sel}`;
+
+      for(const el of elems) {
+        for(const [evName, l] of ls) {
+          el[op + "EventListener"](evName, l);
+        }
+      }
+    }
   }
 
-  uninstall(controls) {
-    controls.canvas.removeEventListener("pointerenter", this.#onPointerEnter());
-    controls.canvas.removeEventListener("pointermove", this.#onPointerMove());
-    controls.canvas.removeEventListener("pointerout", this.#onPointerOut());
-    controls.canvas.removeEventListener("pointerup", this.#onPointerUpCancel());
-    controls.canvas.removeEventListener("pointercancel", this.#onPointerUpCancel());
-    controls.toolRadios.forEach(tr => tr.removeEventListener("change", this.#onToolChange()));
-    controls.picker.removeEventListener("change", this.#onColorChange());
-    controls.sizeInput.removeEventListener("change", this.#onSizeChange());
-    controls.antialiasOn.removeEventListener("change", this.#onAntialiasChange());
-    controls.antialiasOff.removeEventListener("change", this.#onAntialiasChange());
+  install() {
+    this.#setupEventListeners("add");
+  }
+
+  uninstall() {
+    this.#setupEventListeners("remove");
   }
 }
 
@@ -277,7 +290,7 @@ const imageSubscriber = (canvas, serverRelay) => ({
   initialized() {
     this.canvas = document.getElementById("imageCanvas");
     if(!this.canvas.dataset.readonly)
-      this.relay = new CanvasRelay(this.canvas, (action, params) => this.perform(action, params));
+      this.relay = new CanvasRelay(document, (action, params) => this.perform(action, params));
     this.serverRelay = serverRelay;
   },
 
@@ -294,25 +307,11 @@ const imageSubscriber = (canvas, serverRelay) => ({
   },
 
   install() {
-    this.relay?.install({
-      canvas: this.canvas,
-      toolRadios: document.querySelectorAll("#canvasTools input[type=radio]"),
-      picker: document.querySelector("#colorPicker"),
-      sizeInput: document.querySelector("#brushSize"),
-      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
-      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
-    });
+    this.relay?.install();
   },
 
   uninstall() {
-    this.relay?.uninstall({
-      canvas: this.canvas,
-      toolRadios: document.querySelectorAll("#canvasTools input[type=radio]"),
-      picker: document.querySelector("#colorPicker"),
-      sizeInput: document.querySelector("#brushSize"),
-      antialiasOn: document.querySelector("input[name=brushAntialias][value=true]"),
-      antialiasOff: document.querySelector("input[name=brushAntialias][value=false]"),
-    });
+    this.relay?.uninstall();
   },
 
   received(data) {
