@@ -9,32 +9,31 @@ class CanvasRelay {
   }
 
   #onPosInput(inState, inp) {
-    if(inState.last?.cx === inp.cx && inState.last?.cy === inp.cy)
+    if(inState.last?.x === inp.x && inState.last?.y === inp.y)
       return;
-    inState.last = {cx: inp.cx, cy: inp.cy};
-    const r = this.canvas.getBoundingClientRect();
+    inState.last = {x: inp.x, y: inp.y};
     if(inp.down) {
       if(inState.lastDown && (!canvas.dataset.tool || canvas.dataset.tool === "brush" || canvas.dataset.tool === "eraser")) {
         // 1px jaggy brush strokes sometimes disappear with fractional coords
         const aligned = Math.floor;
         const p1 = {
-          x: aligned(inState.lastDown.cx - r.left),
-          y: aligned(inState.lastDown.cy - r.top),
+          x: aligned(inState.lastDown.x),
+          y: aligned(inState.lastDown.y),
         };
         const p2 = {
-          x: aligned(inp.cx - r.left),
-          y: aligned(inp.cy - r.top),
+          x: aligned(inp.x),
+          y: aligned(inp.y),
         };
         const line = {pointer_id: inp.id, p1: p1, p2: p2};
         if(canvas.dataset.tool === "eraser")
           line.eraser = true;
         this.perform("line", line);
       }
-      inState.lastDown = {cx: inp.cx, cy: inp.cy};
+      inState.lastDown = {x: inp.x, y: inp.y};
     } else {
       inState.lastDown = null;
     }
-    this.perform("pos", {pointer_id: inp.id, x: inp.cx - r.left, y: inp.cy - r.top});
+    this.perform("pos", {pointer_id: inp.id, x: inp.x, y: inp.y});
   }
 
   #onPointerEnter() {
@@ -48,7 +47,8 @@ class CanvasRelay {
     // redundant => so this refers to CanvasRelay instead of whatever the method is attached to
     return ev => {
       const inState = this.pointers.getOrInsert(ev.pointerId, {});
-      this.#onPosInput(inState, {id: ev.pointerId, cx: ev.clientX, cy: ev.clientY, down: Util.pointerIsDown(ev)});
+      const [x, y] = Util.localPos(ev, this.canvas);
+      this.#onPosInput(inState, {id: ev.pointerId, x: x, y: y, down: Util.pointerIsDown(ev)});
     };
   }
 
