@@ -162,7 +162,7 @@ class ParticipantCursorManager {
     if(!curs)
       curs = this.userCursors[pid] = {};
     curs[poid] = cur;
-    this.#sizeUpdated(pid, poid);
+    this.#brushUpdated(pid, poid);
     return cur;
   }
 
@@ -178,14 +178,16 @@ class ParticipantCursorManager {
     cur.style.top = window.scrollY + r.top + y + "px";
   }
 
-  sizeUpdatedAll(pid) {
+  brushUpdatedAll(pid) {
     for(const poid of Object.keys(this.userCursors[pid] ?? {}))
-      this.#sizeUpdated(pid, poid);
+      this.#brushUpdated(pid, poid);
   }
 
-  #sizeUpdated(pid, poid) {
-    const size = this.participants.get(pid)?.brush?.size || 1;
-    this.userCursors[pid][poid].querySelector(".cursorCircle").setAttribute("r", size/2 + "px");
+  #brushUpdated(pid, poid) {
+    const brush = this.participants.get(pid)?.brush;
+    const cur = this.userCursors[pid][poid];
+    cur.querySelector(".cursorPointer").style.filter = brush?.antialias ? "none" : "var(--no-antialias-filter)";
+    cur.querySelector(".cursorCircle").setAttribute("r", (brush?.size ?? 1)/2 + "px");
   }
 
   hide(pid, poid) {
@@ -250,13 +252,15 @@ class ServerRelay {
         return;
       }
       this.#getParticipant(data.pid).brush.size = data.size;
-      this.cursors.sizeUpdatedAll(data.pid);
+      this.cursors.brushUpdatedAll(data.pid);
       break;
     case "antialias":
       this.#getParticipant(data.pid).brush.antialias = data.antialias;
+      this.cursors.brushUpdatedAll(data.pid);
       break;
     case "drawop":
       this.#getParticipant(data.pid).brush.drawop = data.drawop;
+      this.cursors.brushUpdatedAll(data.pid);
       break;
     case "line":
       const ctx = this.canvas.getContext("2d");
