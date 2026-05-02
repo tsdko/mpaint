@@ -136,7 +136,7 @@ export async function connect(imageID, options) {
       sRelay.handleData(d)
 
       // yield from time to time to avoid blocking entire page
-      if(n++ % 100 === 0)
+      if(n++ % 1000 === 0)
         await new Promise(resolve => window.setTimeout(() => resolve(), 0));
     }
   }
