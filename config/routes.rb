@@ -11,7 +11,7 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
-  root "images#index"
+  root "images#index", is_editable: true
 
   resources :image_strokes, only: [:index]
 

@@ -3,6 +3,7 @@ class ImagesController < ApplicationController
 
   def index
     @images = Image.all
+    @images = @images.where(min_edit_level: ..Current.user.level) if params[:is_editable]
   end
 
   def show
