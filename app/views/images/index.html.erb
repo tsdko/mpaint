@@ -1,3 +1,17 @@
 <div>
+  <% if local_assigns.key? :is_editable %>
+    <div class="flex rounded-md p-2 bg-neutral-200 dark:bg-neutral-700">
+      <div class="flex-1 rounded-md pt-2 pb-2 text-center <% if is_editable %>bg-neutral-300 dark:bg-neutral-500<% end %>">
+        <% if not is_editable %><a class="inline-block w-full h-full" href="<%= images_url is_editable: true %>"><% end %>
+          Open
+        <% if not is_editable %></a><% end %>
+      </div>
+      <div class="flex-1 rounded-md pt-2 pb-2 text-center <% if not is_editable %>bg-neutral-300 dark:bg-neutral-500<% end %>">
+        <% if is_editable %><a class="inline-block w-full h-full" href="<%= images_url is_editable: false %>"><% end %>
+          Closed
+        <% if is_editable %></a><% end %>
+      </div>
+    </div>
+  <% end %>
   <%= render @images %>
 </div>

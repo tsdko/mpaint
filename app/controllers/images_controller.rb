@@ -3,7 +3,13 @@ class ImagesController < ApplicationController
 
   def index
     @images = Image.all
-    @images = @images.where(min_edit_level: ..Current.user.level) if params[:is_editable]
+    locals = {}
+    if params.key? :is_editable
+      locals[:is_editable] = ActiveRecord::Type::Boolean.new.cast(params[:is_editable])
+      min_level = locals[:is_editable] ? ..Current.user.level : ((Current.user.level + 1)..)
+      @images = @images.where(min_edit_level: min_level)
+    end
+    render locals: locals
   end
 
   def show
