@@ -45,8 +45,6 @@ function openableSetup() {
       if(openable.classList.contains("hidden")) {
         openable.classList.remove("hidden");
         window.setTimeout(() => document.addEventListener("click", closeListener), 0);
-      } else {
-        
       }
     });
   });
