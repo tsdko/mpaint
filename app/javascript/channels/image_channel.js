@@ -1,5 +1,6 @@
 import consumer from "channels/consumer";
 import * as Util from "util";
+import * as Line from "line";
 
 class CanvasRelay {
   #DRAWING_TOOLS = new Set([undefined, "brush", "eraser"]);
@@ -250,7 +251,7 @@ export class ServerRelay {
       this.cursors.hide(data.pid, data.pointer_id);
       break;
     case "color":
-      this.#getParticipant(data.pid).brush.color = `rgb(${data.r}, ${data.g}, ${data.b})`;
+      this.#getParticipant(data.pid).brush.color = (({r, g, b}) => ({r, g, b}))(data);
       break;
     case "size":
       this.#getParticipant(data.pid).brush.size = data.size;
@@ -267,15 +268,9 @@ export class ServerRelay {
     case "line":
       const ctx = this.canvas.getContext("2d");
       const brush = this.#getParticipant(data.pid)?.brush ?? {};
-      ctx.strokeStyle = brush.color ?? "black";
-      ctx.lineWidth = brush.size ?? 1;
-      ctx.lineCap = "round";
-      ctx.filter = brush.antialias ? "none" : Util.noAntialiasFilter;
+      const draw = brush.antialias ? Line.regular : Line.sharp;
       ctx.globalCompositeOperation = brush.drawop ?? "source-over";
-      ctx.beginPath();
-      ctx.moveTo(data.p1.x, data.p1.y);
-      ctx.lineTo(data.p2.x, data.p2.y);
-      ctx.stroke();
+      draw(ctx, data.p1, data.p2, brush);
       break;
     case "image":
       const img = new Image();
