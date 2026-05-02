@@ -6,16 +6,25 @@ class User < ApplicationRecord
   has_many :received_messages, class_name: "Message", as: :target, dependent: :destroy
 
   module Level
+    ANONYMOUS = 25
     USER = 50
     ADMIN = 1000
     MAX = 10000
   end
 
   validates :display_name, length: { maximum: 32 }
-  validates :level, numericality: { in: Level::USER..Level::ADMIN }
+  validates :level, numericality: { in: Level::ANONYMOUS..Level::ADMIN }
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
   class PermissionError < StandardError; end
+
+  class << self
+    def anonymous
+      user = User.new(level: Level::ANONYMOUS, display_name: "名無し")
+      user.freeze.readonly!
+      user
+    end
+  end
 
   def recent_received_messages
     received_messages.order(created_at: :desc).limit(10)

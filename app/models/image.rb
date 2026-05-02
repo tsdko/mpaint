@@ -10,6 +10,10 @@ class Image < ApplicationRecord
     strokes.order(id: :desc).first
   end
 
+  def editable_by?(user)
+    user.level >= min_edit_level
+  end
+
   def to_s
     title || "Image #{id}"
   end

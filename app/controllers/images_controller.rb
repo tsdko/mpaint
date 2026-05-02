@@ -11,6 +11,7 @@ class ImagesController < ApplicationController
 
   def edit
     @image = Image.find(params[:id])
+    raise User::PermissionError unless @image.editable_by? Current.user
   end
 
   def new

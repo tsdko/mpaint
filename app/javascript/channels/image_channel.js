@@ -158,7 +158,13 @@ class ParticipantCursorManager {
                 .querySelector("div");
     // unhide only after we have the position
     cur.classList.add("hidden");
-    cur.querySelector(".userCursorName").textContent = this.participants.get(pid)?.name ?? `名無し＃${pid}`;
+    const participant = this.participants.get(pid);
+    let userName = participant?.name;
+    // TODO: ideally this suffix would get added for every non-unique user
+    // (track currently joined username counts, add to all if non-unique)
+    if(!participant?.id)
+      userName += `＃${pid}`;
+    cur.querySelector(".userCursorName").textContent = userName;
     document.body.appendChild(cur);
     let curs = this.userCursors[pid];
     if(!curs)
