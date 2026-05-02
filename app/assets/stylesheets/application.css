@@ -8,3 +8,7 @@
  *
  * Consider organizing styles into separate files for maintainability.
  */
+
+.bg-checkerboard {
+  background: repeating-conic-gradient(var(--color-neutral-200) 0 25%, white 0 50%) 50% / 32px 32px;
+}

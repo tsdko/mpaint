@@ -212,7 +212,7 @@ class ParticipantCursorManager {
   }
 }
 
-class ServerRelay {
+export class ServerRelay {
   constructor(canvas) {
     this.canvas = canvas;
     // {pid → {id: int?, name: string?, brush: {...}}}
@@ -320,7 +320,6 @@ const imageSubscriber = (canvas, serverRelay) => ({
   },
 });
 
-window.ServerRelay = ServerRelay;
-window.imageSubscribe = (id, canvas, serverRelay, options) => {
+export function imageSubscribe(id, canvas, serverRelay, options) {
   consumer.subscriptions.create({channel: "ImageChannel", id: id, ...options}, imageSubscriber(canvas, serverRelay));
 };

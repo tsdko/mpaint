@@ -2,6 +2,7 @@
 
 pin_all_from "app/javascript/channels", under: "channels"
 
+pin "image_canvas"
 pin "util"
 pin "application"
 pin "@rails/actioncable", to: "@rails--actioncable.js" # @8.1.300
