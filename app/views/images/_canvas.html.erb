@@ -195,7 +195,7 @@ document.getElementById("imageCanvas").getContext("2d").filter = "var(--no-antia
 				pids.forEach(pid => sRelay.handleData({action: "leave", pid: pid}));
 			}).then(() => {
 				canvas.classList.remove("brightness-50");
-				imageSubscribe(<%= @image.id %>, canvas, sRelay);
+				imageSubscribe(<%= @image.id %>, canvas, sRelay, {read_only: <%= readonly %>});
 			});
 	});
 </script>

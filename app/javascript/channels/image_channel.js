@@ -321,6 +321,6 @@ const imageSubscriber = (canvas, serverRelay) => ({
 });
 
 window.ServerRelay = ServerRelay;
-window.imageSubscribe = (id, canvas, serverRelay) => {
-  consumer.subscriptions.create({channel: "ImageChannel", id: id}, imageSubscriber(canvas, serverRelay));
+window.imageSubscribe = (id, canvas, serverRelay, options) => {
+  consumer.subscriptions.create({channel: "ImageChannel", id: id, ...options}, imageSubscriber(canvas, serverRelay));
 };

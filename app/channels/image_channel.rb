@@ -77,7 +77,7 @@ class ImageChannel < ApplicationCable::Channel
 
   private
     def read_only?
-      not @image.editable_by? Current.user
+      params[:read_only] or not @image.editable_by? Current.user
     end
 
     def broadcast_action(data)
