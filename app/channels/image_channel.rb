@@ -18,7 +18,7 @@ class ImageChannel < ApplicationCable::Channel
     stream_for @image
     join_data = {action: "join", pid: @participation.id}
     if not current_user.nil?
-      join_data[:user] = {id: @participation.user.id, name: @participation.user.email_address}
+      join_data[:user] = {id: @participation.user.id, name: @participation.user.to_s}
     end
     broadcast_action(join_data)
   end

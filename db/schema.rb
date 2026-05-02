@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_001912) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_002959) do
   create_table "image_participations", force: :cascade do |t|
     t.datetime "created_at"
     t.integer "image_id", null: false
@@ -57,6 +57,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_001912) do
 
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
+    t.string "display_name", default: "", null: false
     t.string "email_address", null: false
     t.integer "level", default: 50, null: false
     t.string "password_digest", null: false

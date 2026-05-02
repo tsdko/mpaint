@@ -1,0 +1,8 @@
+<%= render "model_errors", model: @user %>
+<%= form_with model: @user do |form| %>
+  <div class="contents">
+    <%= form.label :display_name %>
+    <%= form.text_field :display_name %>
+  </div>
+  <%= form.submit %>
+<% end %>

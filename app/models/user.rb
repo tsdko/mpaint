@@ -11,6 +11,7 @@ class User < ApplicationRecord
     MAX = 10000
   end
 
+  validates :display_name, length: { maximum: 32 }
   validates :level, numericality: { in: Level::USER..Level::ADMIN }
   normalizes :email_address, with: ->(e) { e.strip.downcase }
 
@@ -21,7 +22,7 @@ class User < ApplicationRecord
   end
 
   def to_s
-    email_address
+    display_name.presence || "user ##{id}"
   end
 
   def is_admin?
