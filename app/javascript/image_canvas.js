@@ -1,5 +1,8 @@
 import * as ImageChannel from "channels/image_channel";
 
+// image canvas UI code
+// all the network logic lives in image_channel as of now
+
 function drawBrushSample(canvas, opts) {
   const ctx = canvas.getContext("2d");
   for(const [k, v] of Object.entries(opts)) {
