@@ -39,7 +39,7 @@ class CanvasRelay {
       return;
     inState.last = {x: inp.x, y: inp.y};
     if(inp.down) {
-      if(inState.lastDown && this.#DRAWING_TOOLS.has(canvas.dataset.tool)) {
+      if(inState.lastDown && this.#DRAWING_TOOLS.has(this.canvas.dataset.tool)) {
         // 1px jaggy brush strokes sometimes disappear with fractional coords
         const aligned = Math.floor;
         const p1 = {
