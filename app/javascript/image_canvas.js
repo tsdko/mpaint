@@ -121,21 +121,27 @@ export function setup(options) {
     canvasDrawSetup();
 }
 
-export function connect(imageID, options) {
+export async function connect(imageID, options) {
   const canvas = document.getElementById("imageCanvas");
   const sRelay = new ImageChannel.ServerRelay(canvas);
-  fetch(`${document.documentElement.dataset.rootPath}images/${imageID}/strokes.json`)
-    .then(r => r.json())
-    .then(j => {
-      const pids = new Set();
-      j.forEach(ds => ds.forEach(d => {
-        if(d.pid)
-          pids.add(d.pid);
-        sRelay.handleData(d)
-      }));
-      pids.forEach(pid => sRelay.handleData({action: "leave", pid: pid}));
-    }).then(() => {
-      canvas.classList.remove("brightness-50");
-      ImageChannel.imageSubscribe(imageID, canvas, sRelay, {read_only: options?.readonly});
-    });
+  const r = await fetch(`${document.documentElement.dataset.rootPath}images/${imageID}/strokes.json`);
+  const j = await r.json();
+  const pids = new Set();
+  let n = 0;
+  for(const ds of j) {
+    for(const d of ds) {
+      if(d.pid)
+        pids.add(d.pid);
+
+      sRelay.handleData(d)
+
+      // yield from time to time to avoid blocking entire page
+      if(n++ % 100 === 0)
+        await new Promise(resolve => window.setTimeout(() => resolve(), 0));
+    }
+  }
+  pids.forEach(pid => sRelay.handleData({action: "leave", pid: pid}));
+
+  canvas.classList.remove("brightness-50");
+  ImageChannel.imageSubscribe(imageID, canvas, sRelay, {read_only: options?.readonly});
 }
