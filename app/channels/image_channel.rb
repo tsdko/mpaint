@@ -65,7 +65,7 @@ class ImageChannel < ApplicationCable::Channel
     return if stroke.nil? || stroke.empty?
 
     stroke.add_brush_delta(
-      @prev_brush.reject { |k, v| @brush[k] == v }.merge!(@brush.reject{ |k, _| @prev_brush.key?(k) })
+      @prev_brush.reject { |k, v| @brush[k] == v }.merge!(@brush)
     )
     @image.strokes << stroke
     @prev_brush = @brush
