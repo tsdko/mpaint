@@ -19,7 +19,7 @@ class Image::Stroke < ApplicationRecord
   def wire_data
     data.map do |d|
       wd = wire_from_stored(d)
-      wd[1].merge({pid: participation.id, t: wd[0]})
+      wd[1].merge({pid: participation.id, t: wd[0].to_s})
     end
   end
 
@@ -35,21 +35,22 @@ class Image::Stroke < ApplicationRecord
     WIRE_FROM_STORED_HEADERS = STORED_FROM_WIRE_HEADERS.invert
 
     def stored_from_wire(t, data)
+      data = data.with_indifferent_access
       sd =
         case t
         when :line
           # XXX this still feels quite inefficient, p1/p2 coordinates are usually very close to each other
           #     which means they could probably be delta'd at the very least
           #     (maybe even previous p2 with current p1?)
-          [data['p1']['x'], data['p1']['y'], data['p2']['x'], data['p2']['y']]
+          [data[:p1][:x], data[:p1][:y], data[:p2][:x], data[:p2][:y]]
         when :color
-          [data['r'], data['g'], data['b']]
+          [data[:r], data[:g], data[:b]]
         when :size
-          [data['size']]
+          [data[:size]]
         when :antialias
-          [data['antialias']]
+          [data[:antialias]]
         when :drawop
-          [data['drawop']]
+          [data[:drawop]]
         else
           raise "unsupported wire type #{t}"
         end

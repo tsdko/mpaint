@@ -38,10 +38,8 @@ class ImageChannel < ApplicationCable::Channel
 
     data.delete("action")
     t = data.delete("t")
-    ct = t.camelize
-    out_obj = CanvasCommand.const_get(ct).new(**data)
 
-    out_data = out_obj.instance_values
+    out_data = CanvasCommand::from_wire(t, data).to_h
     ts = t.to_sym
 
     begin
