@@ -21,13 +21,13 @@ class ImageChannelTest < ActionCable::Channel::TestCase
 
     stroke_cmds.each do |cmds|
       cmds.each do |cmd|
-        perform :cmd, cmd.to_h.update({ t: cmd.cmd_type })
+        perform :cmd, cmd.to_h.update({ t: cmd.class.cmd_type })
       end
       perform :cmd, {t: "endstroke"}
     end
 
     def with_symbol_types(scmds)
-      scmds.map { |s| s.map { |cmd| cmd.to_h.symbolize_keys.update({ t: cmd.cmd_type }) } }
+      scmds.map { |s| s.map { |cmd| cmd.to_h.symbolize_keys.update({ t: cmd.class.cmd_type }) } }
     end
 
     roundtripped_cmds = image.strokes.map { |s| s.wire_data.map { |cmds| cmds.keep_if { |k, _| k != :pid }.symbolize_keys } }

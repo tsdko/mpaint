@@ -24,60 +24,45 @@ class Image::Stroke < ApplicationRecord
   end
 
   private
-    STORED_FROM_WIRE_HEADERS = {
-      :line => "l",
-      :color => "cl",
-      :size => "sz",
-      :drawop => "op",
-      :antialias => "aal",
-      :image => "img",
-    }
-    WIRE_FROM_STORED_HEADERS = STORED_FROM_WIRE_HEADERS.invert
+    STORED_CLASSES = CanvasCommand::all.filter do |cc|
+      cc.respond_to? :stored_header and cc.respond_to? :stored_fields
+    end.map do |cc|
+      [cc.stored_header, cc]
+    end.to_h
 
     def stored_from_wire(t, data)
-      data = data.with_indifferent_access
-      sd =
-        case t
-        when :line
-          # XXX this still feels quite inefficient, p1/p2 coordinates are usually very close to each other
-          #     which means they could probably be delta'd at the very least
-          #     (maybe even previous p2 with current p1?)
-          [data[:p1][:x], data[:p1][:y], data[:p2][:x], data[:p2][:y]]
-        when :color
-          [data[:r], data[:g], data[:b]]
-        when :size
-          [data[:size]]
-        when :antialias
-          [data[:antialias]]
-        when :drawop
-          [data[:drawop]]
-        else
-          raise "unsupported wire type #{t}"
-        end
-      [STORED_FROM_WIRE_HEADERS[t], *sd]
+      visit_field = -> (obj, fld) do
+        fld = [fld] unless fld.is_a? Array
+        return obj if fld.empty?
+
+        visit_field.call(obj.[](fld[0]), fld[1..])
+      end
+
+      cmd = CanvasCommand::from_wire t.to_s, data
+      cmd_h = cmd.to_h.deep_symbolize_keys
+      [cmd.class.stored_header, *cmd.class.stored_fields.map { |f| visit_field.call(cmd_h, f) }]
     end
 
     def wire_from_stored(data)
-      st = WIRE_FROM_STORED_HEADERS[data[0]]
-      sd =
-        case [st, *data[1..]]
-        in [:line, x1, y1, x2, y2]
-          {p1: {x: x1, y: y1}, p2: {x: x2, y: y2}}
-        in [:color, r, g, b]
-          {r: r, g: g, b: b}
-        in [:size, s]
-          {size: s}
-        in [:antialias, a]
-          {antialias: a}
-        in [:drawop, o]
-          {drawop: o}
-        in [:image, d]
-          {data: d}
-        else
-          raise "unsupported stored type #{data}"
-        end
-      [st, sd]
-    end
+      w = Hash.new do |h, k|
+        h[k] = {}
+      end
 
+      visit_field = -> (hsh, fld, data) do
+        fld = [fld] unless fld.is_a? Array
+        if fld.length == 1
+          hsh[fld[0]] = data
+          return
+        end
+        visit_field.call(hsh[fld[0]], fld[1..], data)
+      end
+
+      cc = STORED_CLASSES[data[0]]
+      cc.stored_fields.each_with_index do |fpath, i|
+        visit_field.call( w, fpath, data[i+1] )
+      end
+
+      [cc.cmd_type.to_sym, w]
+    end
 end
 
