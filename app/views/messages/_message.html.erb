@@ -1,7 +1,7 @@
 <div class="flex rounded-md p-2 bg-neutral-300 dark:bg-neutral-500">
   <div class="flex-1">
     <%= render partial: "users/header", locals: {user: message.author} %>
-    <div><%= message.content %></div>
+    <div><%= simple_format message.content %></div>
   </div>
   <div>
     <% if authenticated? and message.editable_by? Current.user %>
