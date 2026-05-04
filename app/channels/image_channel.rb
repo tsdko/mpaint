@@ -1,7 +1,4 @@
 class ImageChannel < ApplicationCable::Channel
-  BRUSH_UPDATE_CMDS = Set[:size, :antialias, :color, :drawop]
-  SILENT_CMDS = Set[:endstroke]
-
   def subscribed
     @image = Image.find(params[:id])
     stream_for @image
@@ -38,31 +35,23 @@ class ImageChannel < ApplicationCable::Channel
 
     data.delete("action")
 
-    # run validations
-    out_data = CanvasCommand::from_h(data).to_h
-    t = data['t']
-    ts = t.to_sym
+    cmd = CanvasCommand::from_h data
 
     begin
-      send("cmd_#{t}", out_data)
+      send("cmd_#{cmd.class.cmd_type}", cmd)
     rescue NoMethodError
     end
 
-    if BRUSH_UPDATE_CMDS.include? ts
-      @brush[ts] = out_data.except :t
-    end
-
-    unless SILENT_CMDS.include? ts
-      broadcast_action({action: "cmd", **out_data})
-    end
+    @brush[cmd.class] = cmd if cmd.stateful?
+    broadcast_cmd cmd if cmd.broadcast?
   end
 
-  def cmd_line(data)
-    @strokes[data[:pointer_id]].push_from_wire(data)
+  def cmd_line(c)
+    @strokes[nil].push_cmd(c)
   end
 
-  def cmd_endstroke(data)
-    stroke = @strokes.delete(data[:pointer_id])
+  def cmd_endstroke(c)
+    stroke = @strokes.delete(nil)
     return if stroke.nil? || stroke.empty?
 
     stroke.add_brush_delta(
@@ -77,6 +66,10 @@ class ImageChannel < ApplicationCable::Channel
   private
     def read_only?
       params[:read_only] or not @image.editable_by? Current.user
+    end
+
+    def broadcast_cmd(cmd)
+      broadcast_action({action: "cmd", **cmd.to_h})
     end
 
     def broadcast_action(data)

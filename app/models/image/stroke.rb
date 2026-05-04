@@ -7,13 +7,13 @@ class Image::Stroke < ApplicationRecord
   end
 
   def add_brush_delta(brush)
-    bwire = brush.map { |k, v| stored_from_wire(v.update({t: k.to_s})) }
-    self.data = [*bwire, *data]
+    bdata = brush.map { |_, v| stored_from_cmd(v) }
+    self.data = [*bdata, *data]
   end
 
-  def push_from_wire(wdata)
+  def push_cmd(cmd)
     self.created_at_delta_secs = Time.zone.now - image.created_at if empty?
-    data << stored_from_wire(wdata)
+    data << stored_from_cmd(cmd)
   end
 
   def wire_data
@@ -29,7 +29,7 @@ class Image::Stroke < ApplicationRecord
       [cc.stored_header, cc]
     end.to_h
 
-    def stored_from_wire(data)
+    def stored_from_cmd(cmd)
       visit_field = -> (obj, fld) do
         fld = [fld] unless fld.is_a? Array
         return obj if fld.empty?
@@ -37,7 +37,6 @@ class Image::Stroke < ApplicationRecord
         visit_field.call(obj.[](fld[0]), fld[1..])
       end
 
-      cmd = CanvasCommand::from_wire data
       cmd_h = cmd.to_h.deep_symbolize_keys
       [cmd.class.stored_header, *cmd.class.stored_fields.map { |f| visit_field.call(cmd_h, f) }]
     end

@@ -31,6 +31,17 @@ module CanvasCommand
       name.demodulize.underscore
     end
 
+    # true if this command affects state of other drawing commands
+    # (e.g. modifies brush size or color)
+    def stateful?
+      false
+    end
+
+    # true if this command should be broadcasted once received by the server
+    def broadcast?
+      true
+    end
+
     def to_h
       instance_values.merge({t: self.class.cmd_type})
     end
@@ -54,6 +65,10 @@ module CanvasCommand
     attr_accessor :size
     validates :size, presence: true, numericality: { in: 1..100 }
 
+    def stateful?
+      true
+    end
+
     def self.stored_header
       "sz"
     end
@@ -66,6 +81,10 @@ module CanvasCommand
   class Antialias < Base
     attr_accessor :antialias
     validates :antialias, presence: true
+
+    def stateful?
+      true
+    end
 
     def self.stored_header
       "aal"
@@ -80,6 +99,10 @@ module CanvasCommand
     attr_accessor :r, :g, :b
     validates :r, :g, :b, presence: true, numericality: { in: 0..255 }
 
+    def stateful?
+      true
+    end
+
     def self.stored_header
       "cl"
     end
@@ -92,6 +115,10 @@ module CanvasCommand
   class Drawop < Base
     attr_accessor :drawop
     validates :drawop, presence: true
+
+    def stateful?
+      true
+    end
 
     def self.stored_header
       "op"
@@ -121,5 +148,9 @@ module CanvasCommand
   class Endstroke < Base
     attr_accessor :pointer_id
     validates :pointer_id, presence: true
+
+    def broadcast?
+      false
+    end
   end
 end
