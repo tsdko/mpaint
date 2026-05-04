@@ -4,6 +4,9 @@
     <div><%= message.content %></div>
   </div>
   <div>
+    <% if authenticated? and message.editable_by? Current.user %>
+      (<%= link_to "edit", edit_message_url(message), class: "text-accent-500 hover:text-accent-400" %>)
+    <% end %>
     <% if local_assigns[:show_target] %>on <%= link_to message.target %>, <% end %>
     <%= time_tag message.created_at %>
   </div>

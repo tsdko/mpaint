@@ -37,4 +37,8 @@ class User < ApplicationRecord
   def is_admin?
     level >= Level::ADMIN
   end
+
+  def messageable_by?(user)
+    user.level >= Level::USER
+  end
 end

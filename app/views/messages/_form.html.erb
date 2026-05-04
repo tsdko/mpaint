@@ -1,0 +1,6 @@
+<%= form_with model: message do |form| %>
+  <%= form.hidden_field :target_type %>
+  <%= form.hidden_field :target_id %>
+  <%= form.textarea :content %>
+  <%= form.submit %>
+<% end %>
