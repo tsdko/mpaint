@@ -2,7 +2,7 @@ module CanvasCommand
   # Commands clients can send during drawing.
   # See also Image::Stroke for the stored equivalents.
 
-  def self.from_wire(data)
+  def self.from_h(data)
     ind_data = data.with_indifferent_access
     ct = ind_data[:t].camelize
     CanvasCommand.const_get(ct).new(**ind_data.except(:t))

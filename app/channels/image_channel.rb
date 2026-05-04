@@ -38,7 +38,8 @@ class ImageChannel < ApplicationCable::Channel
 
     data.delete("action")
 
-    out_data = CanvasCommand::from_wire(data).to_h
+    # run validations
+    out_data = CanvasCommand::from_h(data).to_h
     t = data['t']
     ts = t.to_sym
 
