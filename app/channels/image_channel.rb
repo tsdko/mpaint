@@ -37,9 +37,10 @@ class ImageChannel < ApplicationCable::Channel
 
     cmd = CanvasCommand::from_h data
 
-    begin
-      send("cmd_#{cmd.class.cmd_type}", cmd)
-    rescue NoMethodError
+    cmd_method = "cmd_#{cmd.class.cmd_type}"
+    if respond_to? cmd_method
+      send(cmd_method, cmd)
+    end
 
     @brush[cmd.class] = cmd if cmd.stateful?
     broadcast_cmd cmd if cmd.broadcast?
