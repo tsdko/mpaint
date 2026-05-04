@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
   has_many :sessions, dependent: :destroy
-  has_many :image_participations
+  has_many :image_participations, class_name: "Image::Participation"
   has_many :sent_messages, class_name: "Message", foreign_key: "author_id"
   has_many :received_messages, class_name: "Message", as: :target, dependent: :destroy
 
@@ -24,6 +24,14 @@ class User < ApplicationRecord
       user.freeze.readonly!
       user
     end
+  end
+
+  def recent_image_participations
+    image_participations
+      .select("image_participations.*, MAX(image_participations.created_at)")
+      .group("image_participations.image_id")
+      .order("image_participations.created_at DESC")
+      .limit(5)
   end
 
   def recent_received_messages
