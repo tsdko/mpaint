@@ -23,14 +23,24 @@ class ImageChannelTest < ActionCable::Channel::TestCase
       cmds.each do |cmd|
         perform :cmd, cmd.to_h
       end
-      perform :cmd, {t: "endstroke"}
+      perform :cmd, {t: "endstroke", pointer_id: 0}
     end
 
-    def with_symbol_types(scmds)
-      scmds.map { |s| s.map { |cmd| cmd.to_h.symbolize_keys } }
+    def flat_stored_fields(cc)
+      cc.stored_fields.map { |fld| fld.is_a?(Array) ? fld[0] : fld }
+    end
+
+    def adjusted_for_roundtrip(scmds)
+      scmds.map do |s|
+        s.map do |cmd|
+          cmd.to_h.symbolize_keys.select do |k, v|
+            [:t, *flat_stored_fields(cmd.class)].include? k
+          end
+        end
+      end
     end
 
     roundtripped_cmds = image.strokes.map { |s| s.wire_data.map { |cmds| cmds.keep_if { |k, _| k != :pid }.symbolize_keys } }
-    assert_equal with_symbol_types(stroke_cmds), roundtripped_cmds
+    assert_equal adjusted_for_roundtrip(stroke_cmds), roundtripped_cmds
   end
 end

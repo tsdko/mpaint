@@ -31,6 +31,11 @@ module CanvasCommand
       name.demodulize.underscore
     end
 
+    def initialize(*args, **kwargs)
+      super(*args, **kwargs)
+      validate!
+    end
+
     # true if this command affects state of other drawing commands
     # (e.g. modifies brush size or color)
     def stateful?
@@ -43,7 +48,9 @@ module CanvasCommand
     end
 
     def to_h
-      instance_values.merge({t: self.class.cmd_type})
+      instance_values
+        .merge({t: self.class.cmd_type})
+        .except("context_for_validation", "errors")
     end
   end
 
