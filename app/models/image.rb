@@ -14,6 +14,10 @@ class Image < ApplicationRecord
     user.level >= min_edit_level
   end
 
+  def messageable_by?(user)
+    editable_by? user
+  end
+
   def to_s
     title || "Image #{id}"
   end
