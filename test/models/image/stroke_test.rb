@@ -15,9 +15,9 @@ class Image::StrokeTest < ActiveSupport::TestCase
 
   test "should from DB format to wire format" do
     wire = [
-      {action: :color, r: 255, g: 0, b: 255},
-      {action: :line, p1: {x: 1, y: 2}, p2: {x: 3, y: 4}},
-      {action: :line, p1: {x: 3, y: 4}, p2: {x: 6, y: 9}},
+      {t: "color", r: 255, g: 0, b: 255},
+      {t: "line", p1: {x: 1, y: 2}, p2: {x: 3, y: 4}},
+      {t: "line", p1: {x: 3, y: 4}, p2: {x: 6, y: 9}},
     ].map { |d| d.update({pid: @stroke.participation_id}) }
 
     assert_equal wire, @stroke.wire_data
