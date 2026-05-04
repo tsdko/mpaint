@@ -37,9 +37,9 @@ class ImageChannel < ApplicationCable::Channel
     return if read_only?
 
     data.delete("action")
-    t = data.delete("t")
 
-    out_data = CanvasCommand::from_wire(t, data).to_h
+    out_data = CanvasCommand::from_wire(data).to_h
+    t = data['t']
     ts = t.to_sym
 
     begin
@@ -48,16 +48,16 @@ class ImageChannel < ApplicationCable::Channel
     end
 
     if BRUSH_UPDATE_CMDS.include? ts
-      @brush[t.to_sym] = out_data
+      @brush[ts] = out_data.except :t
     end
 
     unless SILENT_CMDS.include? ts
-      broadcast_action({action: "cmd", t: t, **out_data})
+      broadcast_action({action: "cmd", **out_data})
     end
   end
 
   def cmd_line(data)
-    @strokes[data[:pointer_id]].push_from_wire(:line, data)
+    @strokes[data[:pointer_id]].push_from_wire(data)
   end
 
   def cmd_endstroke(data)

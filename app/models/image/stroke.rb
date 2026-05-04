@@ -7,19 +7,18 @@ class Image::Stroke < ApplicationRecord
   end
 
   def add_brush_delta(brush)
-    bwire = brush.map { |k, v| stored_from_wire(k, v) }
+    bwire = brush.map { |k, v| stored_from_wire(v.update({t: k.to_s})) }
     self.data = [*bwire, *data]
   end
 
-  def push_from_wire(t, wdata)
+  def push_from_wire(wdata)
     self.created_at_delta_secs = Time.zone.now - image.created_at if empty?
-    data << stored_from_wire(t, wdata)
+    data << stored_from_wire(wdata)
   end
 
   def wire_data
     data.map do |d|
-      wd = wire_from_stored(d)
-      wd[1].merge({pid: participation.id, t: wd[0].to_s})
+      wire_from_stored(d).merge({pid: participation.id})
     end
   end
 
@@ -30,7 +29,7 @@ class Image::Stroke < ApplicationRecord
       [cc.stored_header, cc]
     end.to_h
 
-    def stored_from_wire(t, data)
+    def stored_from_wire(data)
       visit_field = -> (obj, fld) do
         fld = [fld] unless fld.is_a? Array
         return obj if fld.empty?
@@ -38,7 +37,7 @@ class Image::Stroke < ApplicationRecord
         visit_field.call(obj.[](fld[0]), fld[1..])
       end
 
-      cmd = CanvasCommand::from_wire t.to_s, data
+      cmd = CanvasCommand::from_wire data
       cmd_h = cmd.to_h.deep_symbolize_keys
       [cmd.class.stored_header, *cmd.class.stored_fields.map { |f| visit_field.call(cmd_h, f) }]
     end
@@ -62,7 +61,8 @@ class Image::Stroke < ApplicationRecord
         visit_field.call( w, fpath, data[i+1] )
       end
 
-      [cc.cmd_type.to_sym, w]
+      w[:t] = cc.cmd_type
+      w
     end
 end
 
