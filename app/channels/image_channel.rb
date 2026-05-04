@@ -40,18 +40,17 @@ class ImageChannel < ApplicationCable::Channel
     begin
       send("cmd_#{cmd.class.cmd_type}", cmd)
     rescue NoMethodError
-    end
 
     @brush[cmd.class] = cmd if cmd.stateful?
     broadcast_cmd cmd if cmd.broadcast?
   end
 
   def cmd_line(c)
-    @strokes[nil].push_cmd(c)
+    @strokes[c.pointer_id].push_cmd(c)
   end
 
   def cmd_endstroke(c)
-    stroke = @strokes.delete(nil)
+    stroke = @strokes.delete(c.pointer_id)
     return if stroke.nil? || stroke.empty?
 
     stroke.add_brush_delta(

@@ -56,12 +56,12 @@ module CanvasCommand
 
   class Pinfo < Base
     attr_accessor :pointer_id, :type
-    validates :pointer_id, presence: true
+    validates :pointer_id, presence: true, exclusion: { in: [nil] }
   end
 
   class Pos < Base
     attr_accessor :pointer_id, :x, :y
-    validates :pointer_id, :x, :y, { presence: true }
+    validates :pointer_id, :x, :y, { presence: true, exclusion: { in: [nil] } }
   end
 
   class Poshide < Base
@@ -70,7 +70,7 @@ module CanvasCommand
 
   class Size < Base
     attr_accessor :size
-    validates :size, presence: true, numericality: { in: 1..100 }
+    validates :size, presence: true, exclusion: { in: [nil] }, numericality: { in: 1..100 }
 
     def stateful?
       true
@@ -104,7 +104,7 @@ module CanvasCommand
 
   class Color < Base
     attr_accessor :r, :g, :b
-    validates :r, :g, :b, presence: true, numericality: { in: 0..255 }
+    validates :r, :g, :b, presence: true, exclusion: { in: [nil] }, numericality: { in: 0..255 }
 
     def stateful?
       true
@@ -121,7 +121,7 @@ module CanvasCommand
 
   class Drawop < Base
     attr_accessor :drawop
-    validates :drawop, presence: true
+    validates :drawop, presence: true, exclusion: { in: [nil] }
 
     def stateful?
       true
@@ -137,8 +137,8 @@ module CanvasCommand
   end
 
   class Line < Base
-    attr_accessor :p1, :p2
-    validates :p1, :p2, presence: true
+    attr_accessor :p1, :p2, :pointer_id
+    validates :p1, :p2, :pointer_id, presence: true, exclusion: { in: [nil] }
 
     def self.stored_header
       "l"
@@ -154,7 +154,7 @@ module CanvasCommand
 
   class Endstroke < Base
     attr_accessor :pointer_id
-    validates :pointer_id, presence: true
+    validates :pointer_id, presence: true, exclusion: { in: [nil] }
 
     def broadcast?
       false

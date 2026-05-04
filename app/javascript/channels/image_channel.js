@@ -52,7 +52,7 @@ class CanvasRelay {
           x: aligned(inp.x),
           y: aligned(inp.y),
         };
-        const line = {p1: p1, p2: p2};
+        const line = {pointer_id: inp.id, p1: p1, p2: p2};
         this.perform("line", line);
       }
       inState.lastDown = {x: inp.x, y: inp.y};

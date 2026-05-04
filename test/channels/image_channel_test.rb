@@ -9,13 +9,13 @@ class ImageChannelTest < ActionCable::Channel::TestCase
     stroke_cmds = [
       [
         CanvasCommand::Color.new(r: 30, g: 30, b: 30),
-        CanvasCommand::Line.new(p1: {x: 0, y: 0}, p2: {x: 5, y: 7}),
-        CanvasCommand::Line.new(p1: {x: 5, y: 7}, p2: {x: 8, y: 1}),
+        CanvasCommand::Line.new(pointer_id: 0, p1: {x: 0, y: 0}, p2: {x: 5, y: 7}),
+        CanvasCommand::Line.new(pointer_id: 0, p1: {x: 5, y: 7}, p2: {x: 8, y: 1}),
       ],
       [
         CanvasCommand::Color.new(r: 20, g: 10, b: 0),
-        CanvasCommand::Line.new(p1: {x: 10, y: 10}, p2: {x: 19, y: 8}),
-        CanvasCommand::Line.new(p1: {x: 19, y: 8}, p2: {x: 1, y: 1}),
+        CanvasCommand::Line.new(pointer_id: 0, p1: {x: 10, y: 10}, p2: {x: 19, y: 8}),
+        CanvasCommand::Line.new(pointer_id: 0, p1: {x: 19, y: 8}, p2: {x: 1, y: 1}),
       ],
     ]
 
