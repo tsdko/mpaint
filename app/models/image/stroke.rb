@@ -56,6 +56,7 @@ class Image::Stroke < ApplicationRecord
       end
 
       cc = STORED_CLASSES[data[0]]
+      raise "unsupported stored type #{data[0]}" if cc.nil?
       cc.stored_fields.each_with_index do |fpath, i|
         visit_field.call( w, fpath, data[i+1] )
       end
