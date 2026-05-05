@@ -48,7 +48,9 @@
 			</div>
 		</div>
 	<% end %>
-	<canvas class="bg-checkerboard brightness-50 touch-pinch-zoom" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+	<div id="canvasContainer" class="p-2 touch-pinch-zoom overflow-auto">
+		<canvas class="bg-checkerboard brightness-50" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+	</div>
 </div>
 
 <template id="userCursor">
