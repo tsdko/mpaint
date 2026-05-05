@@ -42,6 +42,12 @@ module CanvasCommand
       false
     end
 
+    # true if this command can be sent by clients
+    # (instead of e.g. only broadcast if stored in a db stroke)
+    def send?
+      true
+    end
+
     # true if this command should be broadcasted once received by the server
     def broadcast?
       true
@@ -149,6 +155,23 @@ module CanvasCommand
       #     which means they could probably be delta'd at the very least
       #     (maybe even previous p2 with current p1?)
       [[:p1, :x], [:p1, :y], [:p2, :x], [:p2, :y]]
+    end
+  end
+
+  class Image < Base
+    attr_accessor :data
+    validates :data, presence: true, exclusion: { in: [nil] }
+
+    def send?
+      false
+    end
+
+    def self.stored_header
+      "img"
+    end
+
+    def self.stored_fields
+      [:data]
     end
   end
 

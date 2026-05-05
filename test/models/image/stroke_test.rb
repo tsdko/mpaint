@@ -22,4 +22,13 @@ class Image::StrokeTest < ActiveSupport::TestCase
 
     assert_equal wire, @stroke.wire_data
   end
+
+  test "should support converting image strokes to wire format" do
+    assert_nothing_raised do
+      Image::Stroke.new(
+        participation: @stroke.participation,
+        data: [["img", "data:image/gif;base64,R0lGODlhAQABAPABAAAAAP///yH5BAAAAAAALAAAAAABAAEAAAICRAEAOw=="]],
+      ).wire_data
+    end
+  end
 end

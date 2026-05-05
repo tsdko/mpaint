@@ -36,6 +36,7 @@ class ImageChannel < ApplicationCable::Channel
     data.delete("action")
 
     cmd = CanvasCommand::from_h data
+    return unless cmd.send?
 
     cmd_method = "cmd_#{cmd.class.cmd_type}"
     if respond_to? cmd_method
