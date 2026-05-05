@@ -1,7 +1,8 @@
 class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
-  def initialize(*args)
-    super(*args)
-    options.merge!(class: "grid grid-cols-[auto_1fr] max-w-sm")
+  def initialize(object_name, object, template, options)
+    grid = options.delete(:grid)
+    super object_name, object, template, options
+    options.merge!(class: "grid grid-cols-[auto_1fr] max-w-sm") if grid
   end
 
   def text_field(attribute, options = {})

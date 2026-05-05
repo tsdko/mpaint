@@ -1,5 +1,5 @@
 <%= render "model_errors", model: @image %>
-<%= form_with model: @image do |form| %>
+<%= form_with model: @image, grid: true do |form| %>
   <div class="contents">
     <%= form.label :title %>
     <%= form.text_field :title %>

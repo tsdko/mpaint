@@ -1,5 +1,5 @@
 <%= render "model_errors", model: @user %>
-<%= form_with model: @user do |form| %>
+<%= form_with model: @user, grid: true do |form| %>
   <div class="contents">
     <%= form.label :display_name %>
     <%= form.text_field :display_name %>
