@@ -1,7 +1,7 @@
 <%# locals: (readonly: false) %>
 
-<div class="grid grid-cols-[auto_1fr] grid-rows-[auto_1fr]">
-	<h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
+<h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
+<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]">
 	<% if readonly %>
 		<div class="mr-2">
 			<% if @image.editable_by? Current.user %>
@@ -14,24 +14,26 @@
 			<% end %>
 		</div>
 	<% else %>
-		<div id="canvasTools" class="mr-2">
+		<div id="canvasTools" class="mr-2 ml-2 overflow-y-auto whitespace-nowrap">
 			<fieldgroup>
-				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+				<label class="inline-block md:block min-w-[2lh] bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="brush" checked />
 					<%= svg_icon "pencil" %>
 				</label>
-				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+				<label class="inline-block md:block min-w-[2lh] bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="eraser" />
 					<%= svg_icon "eraser" %>
 				</label>
-				<label class="block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
+				<label class="inline-block md:block min-w-[2lh] bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 pt-2 pb-2 text-center rounded-md has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300">
 					<input class="hidden" name="tool" type="radio" value="eyedropper" />
 					<%= svg_icon "eye-dropper" %>
 				</label>
 			</fieldgroup>
-			<input id="colorPicker" type="color" class="block rounded-md" />
-			<div class="relative openableContainer">
-				<a href="#" id="brushSizeButton" class="openableToggle block bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
+			<div class="inline-block md:block min-w-[2lh] max-w-[2lh] md:max-w-[initial] align-middle">
+				<input id="colorPicker" type="color" class="rounded-md w-full" />
+			</div>
+			<div class="relative openableContainer inline-block md:block ">
+				<a href="#" id="brushSizeButton" class="openableToggle inline-block md:block min-w-[2lh] bg-neutral-300 dark:bg-neutral-500 mt-2 mb-2 text-center rounded-md"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
 				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
 					<input id="brushSize" min="1" max="100" value="1" type="range" />
 					<fieldgroup>
