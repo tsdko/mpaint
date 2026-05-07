@@ -34,17 +34,14 @@ class ImageChannel < ApplicationCable::Channel
     return if read_only?
 
     data.delete("action")
-
     cmd = CanvasCommand::from_h data
     return unless cmd.send?
 
-    cmd_method = "cmd_#{cmd.class.cmd_type}"
-    if respond_to? cmd_method
-      send(cmd_method, cmd)
-    end
+    process_cmd cmd
+  end
 
-    @brush[cmd.class] = cmd if cmd.stateful?
-    broadcast_cmd cmd if cmd.broadcast?
+  def cmd_multi(c)
+    c.cmds.each &method(:process_cmd)
   end
 
   def cmd_line(c)
@@ -67,6 +64,16 @@ class ImageChannel < ApplicationCable::Channel
   private
     def read_only?
       params[:read_only] or not @image.editable_by? Current.user
+    end
+
+    def process_cmd(cmd)
+      cmd_method = "cmd_#{cmd.class.cmd_type}"
+      if respond_to? cmd_method
+        send(cmd_method, cmd)
+      end
+
+      @brush[cmd.class] = cmd if cmd.stateful?
+      broadcast_cmd cmd if cmd.broadcast?
     end
 
     def broadcast_cmd(cmd)

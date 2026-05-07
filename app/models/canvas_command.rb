@@ -60,6 +60,19 @@ module CanvasCommand
     end
   end
 
+  class Multi < Base
+    attr_accessor :data, :type
+    validates :data, presence: true, exclusion: { in: [nil] }
+
+    def broadcast?
+      false
+    end
+
+    def cmds
+      data.map &CanvasCommand.method(:from_h)
+    end
+  end
+
   class Pinfo < Base
     attr_accessor :pointer_id, :type
     validates :pointer_id, presence: true, exclusion: { in: [nil] }

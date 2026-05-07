@@ -86,12 +86,16 @@ class CanvasRelay {
     case "brush":
       const picker = document.querySelector(this.#PICKER_SEL);
       const rgba = Util.rgbaFromCSS(picker.value);
-      this.perform("color", {r: rgba[0], g: rgba[1], b: rgba[2]});
-      this.perform("drawop", {drawop: "source-over"});
+      this.perform("multi", {data: [
+        {t: "color", r: rgba[0], g: rgba[1], b: rgba[2]},
+        {t: "drawop", drawop: "source-over"},
+      ]});
       break;
     case "eraser":
-      this.perform("color", {r: 0, g: 0, b: 0});
-      this.perform("drawop", {drawop: "destination-out"});
+      this.perform("multi", {data: [
+        {t: "color", r: 0, g: 0, b: 0},
+        {t: "drawop", drawop: "destination-out"},
+      ]});
       break;
     }
   }

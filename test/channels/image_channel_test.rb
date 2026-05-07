@@ -43,4 +43,24 @@ class ImageChannelTest < ActionCable::Channel::TestCase
     roundtripped_cmds = image.strokes.map { |s| s.wire_data.map { |cmds| cmds.keep_if { |k, _| k != :pid }.symbolize_keys } }
     assert_equal adjusted_for_roundtrip(stroke_cmds), roundtripped_cmds
   end
+
+  test "bulk commands are supported" do
+    image = Image.create
+    stub_connection current_user: users(:one)
+    subscribe id: image.id
+
+    stroke_cmds = [CanvasCommand::Multi.new(data: [
+      CanvasCommand::Color.new(r: 255, g: 0, b: 255).to_h,
+      CanvasCommand::Size.new(size: 10).to_h,
+      CanvasCommand::Line.new(pointer_id: 0, p1: {x: 1, y: 2}, p2: {x: 3, y: 4}).to_h,
+      CanvasCommand::Line.new(pointer_id: 0, p1: {x: 3, y: 4}, p2: {x: 6, y: 9}).to_h,
+      CanvasCommand::Endstroke.new(pointer_id: 0).to_h,
+    ])]
+
+    stroke_cmds.each do |cmd|
+      perform :cmd, cmd.to_h
+    end
+
+    assert_equal [image_strokes(:one).data], image.strokes.map(&:data)
+  end
 end
