@@ -4,7 +4,7 @@ one:
   image: one
   participation: one
   created_at_delta_secs: 0
-  data: [["cl", 255, 0, 255], ["l", 1, 2, 3, 4], ["l", 3, 4, 6, 9]]
+  data: [["cl", 255, 0, 255], ["sz", 10], ["l", 1, 2, 3, 4], ["l", 3, 4, 6, 9]]
 
 two:
   image: two
