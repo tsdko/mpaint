@@ -24,6 +24,10 @@ class User < ApplicationRecord
       user.freeze.readonly!
       user
     end
+
+    def sensitive_attributes
+      [:email_address, :password_digest]
+    end
   end
 
   def recent_image_participations
