@@ -16,6 +16,7 @@ Rails.application.routes.draw do
   resources :image_strokes, only: [:index]
 
   resources :images, only: [:new, :create, :index, :show, :edit] do
+    resources :image_participations, path: "participations", only: [:index]
     resources :image_strokes, path: "strokes", only: [:index]
   end
   resources :messages, only: [:index, :show, :edit, :create, :update]

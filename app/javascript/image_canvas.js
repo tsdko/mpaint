@@ -126,13 +126,9 @@ export async function connect(imageID, options) {
   const sRelay = new ImageChannel.ServerRelay(canvas);
   const r = await fetch(`${document.documentElement.dataset.rootPath}images/${imageID}/strokes.json`);
   const j = await r.json();
-  const pids = new Set();
   let n = 0;
   for(const ds of j) {
     for(const d of ds) {
-      if(d.pid)
-        pids.add(d.pid);
-
       sRelay.handleData(d)
 
       // yield from time to time to avoid blocking entire page
@@ -140,7 +136,28 @@ export async function connect(imageID, options) {
         await new Promise(resolve => window.setTimeout(() => resolve(), 0));
     }
   }
-  pids.forEach(pid => sRelay.handleData({action: "leave", pid: pid}));
+  const users = {};
+  const pr = await fetch(`${document.documentElement.dataset.rootPath}images/${imageID}/participations.json`);
+  const participations = await pr.json();
+  for(const p of participations) {
+    let relayData;
+    if(p.open) {
+      let user = {};
+      if(p.user_id) {
+        user = users[p.user_id];
+        if(!user) {
+          user = await fetch(`${document.documentElement.dataset.rootPath}users/${p.user_id}.json`).then(r => r.json());
+          users[p.user_id] = user;
+        }
+      }
+      // send over user data if the session is still open
+      relayData = {action: "join", pid: p.id, user: {name: user.display_name, ...user}};
+    } else {
+      // otherwise make sure we don't keep any state for this participation by sending a leave
+      relayData = {action: "leave", pid: p.id};
+    }
+    sRelay.handleData(relayData);
+  }
 
   canvas.classList.remove("brightness-50");
   ImageChannel.imageSubscribe(imageID, canvas, sRelay, {read_only: options?.readonly});

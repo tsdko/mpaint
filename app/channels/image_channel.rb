@@ -7,7 +7,7 @@ class ImageChannel < ApplicationCable::Channel
 
     @brush = {}
     @prev_brush = {}
-    @participation = Image::Participation.create(image: @image, user: Current.user)
+    @participation = Image::Participation.create(image: @image, user: Current.user, open: true)
     @strokes = Hash.new do |h, k|
       h[k] = Image::Stroke.new(
         image: @image,
@@ -27,6 +27,9 @@ class ImageChannel < ApplicationCable::Channel
   def unsubscribed
     return if read_only?
 
+    # XXX ideally the open state would be kept in-memory only; having it in the db
+    #     creates inconsistency risks in case of unexpected crashes for example
+    @participation.update(open: false)
     broadcast_action({action: "leave", pid: @participation.id})
   end
 

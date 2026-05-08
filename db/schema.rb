@@ -10,10 +10,11 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_005036) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_08_011003) do
   create_table "image_participations", force: :cascade do |t|
     t.datetime "created_at"
     t.integer "image_id", null: false
+    t.boolean "open", default: false, null: false
     t.integer "user_id"
     t.index ["image_id"], name: "index_image_participations_on_image_id"
     t.index ["user_id"], name: "index_image_participations_on_user_id"
