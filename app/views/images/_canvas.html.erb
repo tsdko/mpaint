@@ -57,7 +57,15 @@
 			</div>
 		</div>
 	<% end %>
-	<div id="canvasContainer" class="p-2 relative touch-pinch-zoom overflow-auto max-h-[70vh]">
+	<div id="canvasContainer"
+		class="p-2 relative touch-pinch-zoom overflow-auto max-h-[70vh]"
+		data-controller="drag-scroll"
+		data-action="
+			pointermove->drag-scroll#drag
+			pointerup->drag-scroll#resetXY
+			pointercancel->drag-scroll#resetXY
+			pointerout->drag-scroll#resetXY
+		">
 		<canvas class="bg-checkerboard brightness-50" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 	</div>
 </div>

@@ -60,29 +60,6 @@ function canvasFilterSetup() {
   });
 }
 
-function canvasDragSetup() {
-  let last = {}, scrolling = false;
-  const container = document.querySelector("#canvasContainer");
-  container.addEventListener("pointermove", ev => {
-    if(!(ev.buttons & 4) || ev.pointerType !== "mouse")
-      return;
-
-    const [x, y] = Util.localPos(ev, container);
-    if(last.x && last.y) {
-        container.scroll({
-          left: container.scrollLeft - (x - last.x),
-          top: container.scrollTop - (y - last.y),
-          behavior: "instant",
-        });
-    }
-    last.x = x;
-    last.y = y;
-  });
-  container.addEventListener("pointerup", ev => {last = {}});
-  container.addEventListener("pointercancel", ev => {last = {}});
-  container.addEventListener("pointerout", ev => {last = {}});
-}
-
 // only called if not read-only
 function canvasDrawSetup() {
   brushSizeCanvasSetup();
@@ -140,7 +117,6 @@ function canvasDrawSetup() {
 
 export function setup(options) {
   canvasFilterSetup();
-  canvasDragSetup();
   if(!options?.readonly)
     canvasDrawSetup();
 }
