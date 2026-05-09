@@ -7,12 +7,7 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = if params[:id] == "anonymous"
-      User::anonymous
-    else
-      User.find(params[:id])
-    end
-
+    @user = User.find(params[:id])
     respond_to do |format|
       format.html
       format.json { render json: @user.as_json(except: @user.class.sensitive_attributes) }
