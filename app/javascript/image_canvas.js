@@ -67,11 +67,6 @@ function canvasDrawSetup() {
 
   const canvas = document.getElementById('imageCanvas');
 
-  // all tools
-  document.querySelectorAll("input[name=tool]").forEach(el => el.addEventListener("input", ev => {
-    document.getElementById("imageCanvas").dataset.tool = ev.target.value;
-  }));
-
   // eyedropper
   function pickCanvasColor(ev) {
     if(canvas.dataset.tool !== "eyedropper" || !Util.pointerIsDown(ev))
