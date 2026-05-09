@@ -38,6 +38,11 @@
 						data-action="canvas-tool#update" />
 					<%= svg_icon "eye-dropper" %>
 				</label>
+				<label class="<%= canvas_control_classes %> <%= check_button_classes %>">
+					<input class="hidden" name="tool" type="radio" value="move"
+						data-action="canvas-tool#update" />
+					<%= svg_icon "arrows-up-down-left-right" %>
+				</label>
 			</fieldgroup>
 			<div class="<%= canvas_control_classes %> max-w-[2lh] md:max-w-[initial] align-middle">
 				<input id="colorPicker" type="color" class="rounded-md w-full" />
@@ -70,7 +75,7 @@
 			pointercancel->drag-scroll#resetXY
 			pointerout->drag-scroll#resetXY
 		">
-		<canvas class="bg-checkerboard brightness-50" id="imageCanvas" data-canvas-tool-target="canvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+		<canvas class="bg-checkerboard brightness-50" id="imageCanvas" data-drag-scroll-target="dataHolder" data-canvas-tool-target="canvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 	</div>
 </div>
 
