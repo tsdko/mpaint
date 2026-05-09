@@ -43,7 +43,7 @@ class User < ApplicationRecord
   end
 
   def display_name
-    read_attribute(:display_name).presence || "user ##{id}"
+    super.presence || "user ##{id}"
   end
 
   def to_s
