@@ -152,6 +152,10 @@ class ParticipantCursorManager {
     this.canvas = canvas;
     this.participants = participants;
     this.userCursors = {};
+
+    const ccr = document.querySelector("#canvasContainer").getBoundingClientRect();
+    const cr = this.canvas.getBoundingClientRect();
+    this.canvasMargins = {x: cr.left - ccr.left, y: cr.top - ccr.top};
   }
 
   #getOrMakeElement(pid, poid) {
@@ -171,7 +175,7 @@ class ParticipantCursorManager {
     if(!participant?.id)
       userName += `＃${pid}`;
     cur.querySelector(".userCursorName").textContent = userName;
-    document.body.appendChild(cur);
+    document.querySelector("#canvasContainer").appendChild(cur);
     let curs = this.userCursors[pid];
     if(!curs)
       curs = this.userCursors[pid] = {};
@@ -187,9 +191,8 @@ class ParticipantCursorManager {
 
   show(pid, poid, x, y) {
     const cur = this.#getOrMakeElement(pid, poid);
-    const r = this.canvas.getBoundingClientRect();
-    cur.style.left = window.scrollX + r.left + x + "px";
-    cur.style.top = window.scrollY + r.top + y + "px";
+    cur.style.left = this.canvasMargins.x + x + "px";
+    cur.style.top = this.canvasMargins.y + y + "px";
     cur.classList.remove("hidden");
   }
 

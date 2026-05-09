@@ -57,7 +57,7 @@
 			</div>
 		</div>
 	<% end %>
-	<div id="canvasContainer" class="p-2 touch-pinch-zoom overflow-auto">
+	<div id="canvasContainer" class="p-2 relative touch-pinch-zoom overflow-auto">
 		<canvas class="bg-checkerboard brightness-50" id="imageCanvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
 	</div>
 </div>
