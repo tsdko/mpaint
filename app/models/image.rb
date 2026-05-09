@@ -3,8 +3,13 @@ class Image < ApplicationRecord
   has_many :strokes, dependent: :destroy
   has_many :participations, dependent: :destroy
 
+  validates :title, presence: true
   validates :width, presence: true
   validates :height, presence: true
+
+  def title
+    super || "おえかき"
+  end
 
   def last_stroke
     strokes.order(id: :desc).first
