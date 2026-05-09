@@ -142,13 +142,11 @@ export async function connect(imageID, options) {
   for(const p of participations) {
     let relayData;
     if(p.open) {
-      let user = {};
-      if(p.user_id) {
-        user = users[p.user_id];
-        if(!user) {
-          user = await fetch(`${document.documentElement.dataset.rootPath}users/${p.user_id}.json`).then(r => r.json());
-          users[p.user_id] = user;
-        }
+      let user = users[p.user_id];
+      if(!user) {
+        const reqID = p.user_id ?? "anonymous";
+        user = await fetch(`${document.documentElement.dataset.rootPath}users/${reqID}.json`).then(r => r.json());
+        users[p.user_id] = user;
       }
       // send over user data if the session is still open
       relayData = {action: "join", pid: p.id, user: {name: user.display_name, ...user}};
