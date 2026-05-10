@@ -19,5 +19,7 @@ export default class extends Controller {
     if(toolDataProps.hasOwnProperty(tool)) {
       this.canvasTarget.dataset[toolDataProps[tool] + "Active"] = true;
     }
+
+    this.dispatch("update", {target: ev.currentTarget});
   }
 }

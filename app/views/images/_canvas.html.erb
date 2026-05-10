@@ -8,7 +8,7 @@
 %>
 
 <h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
-<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]" data-controller="canvas-tool color-pick">
+<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]" data-controller="canvas-tool color-pick channel-canvas" data-action="canvas-tool:update->channel-canvas#changeTool">
 	<% if readonly %>
 		<div class="mr-2">
 			<% if @image.editable_by? Current.user %>
@@ -45,19 +45,19 @@
 				</label>
 			</fieldgroup>
 			<div class="<%= canvas_control_classes %> max-w-[2lh] md:max-w-[initial] align-middle">
-				<input id="colorPicker" type="color" class="rounded-md w-full" data-color-pick-target="input" />
+				<input id="colorPicker" type="color" class="rounded-md w-full" data-color-pick-target="input" data-channel-canvas-target="colorPicker" data-action="change->channel-canvas#changeColor" />
 			</div>
 			<div class="relative openableContainer inline-block md:block ">
 				<a href="#" id="brushSizeButton" class="openableToggle <%= canvas_control_classes %> <%= button_classes %>"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
 				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
-					<input id="brushSize" min="1" max="100" value="1" type="range" />
+					<input id="brushSize" min="1" max="100" value="1" type="range" data-action="change->channel-canvas#changeSize" />
 					<fieldgroup>
 						<label class="<%= check_button_classes %>">
-							<input class="hidden" name="brushAntialias" type="radio" value="false" checked />
+							<input class="hidden" name="brushAntialias" type="radio" value="false" checked data-action="channel-canvas#changeAntialias" />
 							<%= svg_icon "slash", class: "filter-(--no-antialias-filter)" %>
 						</label>
 						<label class="<%= check_button_classes %>">
-							<input class="hidden" name="brushAntialias" type="radio" value="true" />
+							<input class="hidden" name="brushAntialias" type="radio" value="true" data-action="channel-canvas#changeAntialias" />
 							<%= svg_icon "slash" %>
 						</label>
 					</fieldgroup>
@@ -80,9 +80,19 @@
 				pointerdown->color-pick#pick
 				pointermove->color-pick#pick
 				pointerup->color-pick#dispatchChange
+
+				<%# XXX is this really how you are supposed to use controllers?
+				        half of the required logic (which events to attach,
+				        what they correspond to) is in the html template %>
+				pointerenter->channel-canvas#sendPinfo
+				pointermove->channel-canvas#movePointer
+				pointerout->channel-canvas#hidePointer
+				pointerup->channel-canvas#endStroke
+				pointercancel->channel-canvas#endStroke
 			"
 			data-drag-scroll-target="dataHolder"
 			data-canvas-tool-target="canvas"
+			data-channel-canvas-target="canvas"
 			<% if readonly %>data-readonly="true"<% end %>
 			width="<%= @image.width =%>" height="<%= @image.height =%>">
 		</canvas>
