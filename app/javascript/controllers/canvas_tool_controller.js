@@ -1,6 +1,7 @@
 import { Controller } from "@hotwired/stimulus";
 
 const toolDataProps = {
+  "eyedropper": "colorPick",
   "move": "drag",
 };
 

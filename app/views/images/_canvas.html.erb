@@ -8,7 +8,7 @@
 %>
 
 <h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
-<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]" data-controller="canvas-tool">
+<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]" data-controller="canvas-tool color-pick">
 	<% if readonly %>
 		<div class="mr-2">
 			<% if @image.editable_by? Current.user %>
@@ -45,7 +45,7 @@
 				</label>
 			</fieldgroup>
 			<div class="<%= canvas_control_classes %> max-w-[2lh] md:max-w-[initial] align-middle">
-				<input id="colorPicker" type="color" class="rounded-md w-full" />
+				<input id="colorPicker" type="color" class="rounded-md w-full" data-color-pick-target="input" />
 			</div>
 			<div class="relative openableContainer inline-block md:block ">
 				<a href="#" id="brushSizeButton" class="openableToggle <%= canvas_control_classes %> <%= button_classes %>"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
@@ -75,7 +75,17 @@
 			pointercancel->drag-scroll#resetXY
 			pointerout->drag-scroll#resetXY
 		">
-		<canvas class="bg-checkerboard brightness-50" id="imageCanvas" data-drag-scroll-target="dataHolder" data-canvas-tool-target="canvas" <% if readonly %>data-readonly="true"<% end %> width="<%= @image.width =%>" height="<%= @image.height =%>"></canvas>
+		<canvas class="bg-checkerboard brightness-50" id="imageCanvas"
+			data-action="
+				pointerdown->color-pick#pick
+				pointermove->color-pick#pick
+				pointerup->color-pick#dispatchChange
+			"
+			data-drag-scroll-target="dataHolder"
+			data-canvas-tool-target="canvas"
+			<% if readonly %>data-readonly="true"<% end %>
+			width="<%= @image.width =%>" height="<%= @image.height =%>">
+		</canvas>
 	</div>
 </div>
 

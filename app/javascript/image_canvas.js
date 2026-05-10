@@ -67,22 +67,6 @@ function canvasDrawSetup() {
 
   const canvas = document.getElementById('imageCanvas');
 
-  // eyedropper
-  function pickCanvasColor(ev) {
-    if(canvas.dataset.tool !== "eyedropper" || !Util.pointerIsDown(ev))
-      return;
-    const [x, y] = Util.localPos(ev, canvas);
-    const [r, g, b, a] = canvas.getContext("2d").getImageData(Math.round(x), Math.round(y), 1, 1).data;
-    colorPicker.value = `rgb(${r}, ${g}, ${b})`;
-  }
-  canvas.addEventListener("pointerdown", ev => pickCanvasColor(ev));
-  canvas.addEventListener("pointermove", ev => pickCanvasColor(ev));
-  canvas.addEventListener("pointerup", e => {
-    if(canvas.dataset.tool !== "eyedropper")
-      return;
-    colorPicker.dispatchEvent(new Event("change"));
-  });
-
   // brush size
   document.getElementById("brushSize").addEventListener("input", e => {
     drawBrushSample(brushSizeCanvas, {lineWidth: e.target.value});
@@ -104,9 +88,6 @@ function canvasDrawSetup() {
   // reset input state in case the browser remembered it
   document.querySelectorAll("input[type=radio]").forEach(el => {
     el.checked = el.hasAttribute("checked");
-  });
-  document.querySelectorAll("input[type=color]").forEach(el => {
-    el.value = el.getAttribute("value");
   });
 }
 
