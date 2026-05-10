@@ -29,7 +29,7 @@ class ImageChannel < ApplicationCable::Channel
 
     # XXX ideally the open state would be kept in-memory only; having it in the db
     #     creates inconsistency risks in case of unexpected crashes for example
-    @participation.update(open: false)
+    @participation.close
     broadcast_action({action: "leave", pid: @participation.id})
   end
 
