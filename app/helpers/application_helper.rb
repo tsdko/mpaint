@@ -1,4 +1,26 @@
 module ApplicationHelper
+  def control_classes
+    "bg-neutral-300 dark:bg-neutral-500 rounded-md"
+  end
+
+  def button_classes
+    %w[
+      hover:bg-neutral-200
+      dark:hover:bg-neutral-400
+      mt-2 mb-2 p-2
+      text-center
+    ].push(control_classes).join(" ")
+  end
+
+  def check_button_classes
+    %w[
+      has-checked:text-neutral-300
+      dark:has-checked:text-neutral-600
+      has-checked:bg-neutral-600
+      dark:has-checked:bg-neutral-300
+    ].push(button_classes).join(" ")
+  end
+
   def error_bg_classes
     "bg-red-200 dark:bg-red-600"
   end

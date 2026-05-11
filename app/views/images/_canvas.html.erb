@@ -1,12 +1,5 @@
 <%# locals: (readonly: false) %>
 
-<%
-  control_classes = "bg-neutral-300 dark:bg-neutral-500 rounded-md"
-  canvas_control_classes = "inline-block md:block min-w-[2lh]"
-  button_classes = "#{control_classes} hover:bg-neutral-200 dark:hover:bg-neutral-400 mt-2 mb-2 p-2 text-center"
-  check_button_classes = "#{button_classes} has-checked:text-neutral-300 dark:has-checked:text-neutral-600 has-checked:bg-neutral-600 dark:has-checked:bg-neutral-300"
-%>
-
 <h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
 <div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]" data-controller="canvas-tool color-pick channel-canvas" data-action="canvas-tool:update->channel-canvas#changeTool">
 	<% if readonly %>
@@ -23,26 +16,10 @@
 	<% else %>
 		<div id="canvasTools" class="mr-2 ml-2 whitespace-nowrap">
 			<fieldset>
-				<label class="<%= canvas_control_classes %> <%= check_button_classes %>">
-					<input class="hidden" name="tool" type="radio" value="brush" checked
-						data-action="canvas-tool#update" />
-					<%= svg_icon "pencil" %>
-				</label>
-				<label class="<%= canvas_control_classes %> <%= check_button_classes %>">
-					<input class="hidden" name="tool" type="radio" value="eraser"
-						data-action="canvas-tool#update" />
-					<%= svg_icon "eraser" %>
-				</label>
-				<label class="<%= canvas_control_classes %> <%= check_button_classes %>">
-					<input class="hidden" name="tool" type="radio" value="eyedropper"
-						data-action="canvas-tool#update" />
-					<%= svg_icon "eye-dropper" %>
-				</label>
-				<label class="<%= canvas_control_classes %> <%= check_button_classes %>">
-					<input class="hidden" name="tool" type="radio" value="move"
-						data-action="canvas-tool#update" />
-					<%= svg_icon "arrows-up-down-left-right" %>
-				</label>
+				<%= canvas_tool_button "brush", icon: "pencil" %>
+				<%= canvas_tool_button "eraser", icon: "eraser" %>
+				<%= canvas_tool_button "eyedropper", icon: "eye-dropper" %>
+				<%= canvas_tool_button "move", icon: "arrows-up-down-left-right" %>
 			</fieldset>
 			<div class="<%= canvas_control_classes %> max-w-[2lh] md:max-w-[initial] align-middle">
 				<input id="colorPicker" type="color" class="rounded-md w-full" data-color-pick-target="input" data-channel-canvas-target="colorPicker" data-action="change->channel-canvas#changeColor" />
