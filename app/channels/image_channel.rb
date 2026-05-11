@@ -14,6 +14,7 @@ class ImageChannel < ApplicationCable::Channel
         participation: @participation
       )
     end
+    stream_for @participation
 
     join_data = {action: "join", pid: @participation.id}
     join_data[:user] = {
@@ -37,7 +38,12 @@ class ImageChannel < ApplicationCable::Channel
     return if read_only?
 
     data.delete("action")
-    cmd = CanvasCommand::from_h data
+    begin
+      cmd = CanvasCommand::from_h data
+    rescue ActiveModel::ValidationError => e
+      broadcast_errors e.model
+      return
+    end
     return unless cmd.send?
 
     process_cmd cmd
@@ -61,7 +67,7 @@ class ImageChannel < ApplicationCable::Channel
     @image.strokes << stroke
     @prev_brush = @brush
     @brush = {}
-    # TODO: pass .errors if present? maybe via a private user-specific channel
+    broadcast_errors stroke
   end
 
   private
@@ -77,6 +83,11 @@ class ImageChannel < ApplicationCable::Channel
 
       @brush[cmd.class] = cmd if cmd.stateful?
       broadcast_cmd cmd if cmd.broadcast?
+    end
+
+    def broadcast_errors(model)
+      return if model.errors.empty?
+      ImageChannel.broadcast_to(@participation, {toast: model.errors.full_messages.join(".\n")})
     end
 
     def broadcast_cmd(cmd)

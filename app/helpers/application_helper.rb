@@ -1,4 +1,8 @@
 module ApplicationHelper
+  def error_bg_classes
+    "bg-red-200 dark:bg-red-600"
+  end
+
   def time_tag(datetime, relative: false, data: {}, **options)
     # time tags with datetime present are automatically localized to the user's
     # timezone via js Util.localizeDateTimes; data-is-relative determines whether
@@ -12,6 +16,17 @@ module ApplicationHelper
 
     tag.time(datetime: datetime.rfc3339, data: data, title: sub, **options) do
       main
+    end
+  end
+
+  def toast(content)
+    tag.div(data: {controller: "close"}, class: "flex rounded-md p-2 m-2 #{error_bg_classes} w-xs") do
+      concat(tag.div(class: "toastContent flex-1") do
+        simple_format content
+      end)
+      concat(tag.a(href: "#", data: {action: "close#close:prevent"}) do
+        svg_icon "xmark"
+      end)
     end
   end
 

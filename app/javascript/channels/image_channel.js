@@ -97,6 +97,12 @@ export class ServerRelay {
 
   handleData(data) {
     if(data.action !== "cmd") {
+      if(data.toast) {
+        let t = document.importNode(document.getElementById("toastTemplate").content, true).firstElementChild;
+        t.querySelector(".toastContent").textContent = data.toast;
+        document.querySelector("#toastContainer").prepend(t);
+      }
+
       switch(data.action) {
       case "join":
         if(data.user)

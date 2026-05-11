@@ -27,6 +27,11 @@
 
   <body class="bg-neutral-50 text-neutral-900 dark:bg-neutral-800 dark:text-neutral-200">
     <%= render "top_bar" %>
+    <div id="toastContainer" class="absolute inset-e-0 top-0 z-10">
+      <template id="toastTemplate">
+        <%= toast "" %>
+      </template>
+    </div>
     <main class="container mx-auto mt-10 px-5">
       <%= yield %>
     </main>
