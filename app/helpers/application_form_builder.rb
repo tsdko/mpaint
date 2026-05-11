@@ -22,7 +22,7 @@ class ApplicationFormBuilder < ActionView::Helpers::FormBuilder
   end
 
   def textarea(attribute, options = {})
-    super(attribute, options.merge(class: TEXT_INPUT_CLASSES))
+    super(attribute, options.merge(class: "#{TEXT_INPUT_CLASSES} min-w-3xs"))
   end
 
   def submit(value = nil, options = {})
