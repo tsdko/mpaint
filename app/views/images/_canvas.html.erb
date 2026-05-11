@@ -22,7 +22,7 @@
 		</div>
 	<% else %>
 		<div id="canvasTools" class="mr-2 ml-2 whitespace-nowrap">
-			<fieldgroup>
+			<fieldset>
 				<label class="<%= canvas_control_classes %> <%= check_button_classes %>">
 					<input class="hidden" name="tool" type="radio" value="brush" checked
 						data-action="canvas-tool#update" />
@@ -43,7 +43,7 @@
 						data-action="canvas-tool#update" />
 					<%= svg_icon "arrows-up-down-left-right" %>
 				</label>
-			</fieldgroup>
+			</fieldset>
 			<div class="<%= canvas_control_classes %> max-w-[2lh] md:max-w-[initial] align-middle">
 				<input id="colorPicker" type="color" class="rounded-md w-full" data-color-pick-target="input" data-channel-canvas-target="colorPicker" data-action="change->channel-canvas#changeColor" />
 			</div>
@@ -51,7 +51,7 @@
 				<a href="#" id="brushSizeButton" class="openableToggle <%= canvas_control_classes %> <%= button_classes %>"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
 				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
 					<input id="brushSize" min="1" max="100" value="1" type="range" data-action="change->channel-canvas#changeSize" />
-					<fieldgroup>
+					<fieldset>
 						<label class="<%= check_button_classes %>">
 							<input class="hidden" name="brushAntialias" type="radio" value="false" checked data-action="channel-canvas#changeAntialias" />
 							<%= svg_icon "slash", class: "filter-(--no-antialias-filter)" %>
@@ -60,7 +60,7 @@
 							<input class="hidden" name="brushAntialias" type="radio" value="true" data-action="channel-canvas#changeAntialias" />
 							<%= svg_icon "slash" %>
 						</label>
-					</fieldgroup>
+					</fieldset>
 				</div>
 			</div>
 		</div>
