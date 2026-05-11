@@ -106,7 +106,7 @@ module CanvasCommand
 
   class Antialias < Base
     attr_accessor :antialias
-    validates :antialias, presence: true
+    validates :antialias, inclusion: { in: [true, false] }
 
     def stateful?
       true
