@@ -87,7 +87,18 @@ class ImageChannel < ApplicationCable::Channel
 
     def broadcast_errors(model)
       return if model.errors.empty?
-      ImageChannel.broadcast_to(@participation, {toast: model.errors.full_messages.join(".\n")})
+
+      # we could use turbo streams instead but for that we'd have to make up
+      # a participation-specific turbo stream source, make the client subscribe to it from js
+      # (because we can't access the participation from the view as it's entirely handled here
+      # (ideally its lifetime should be tied to the connection)), then push updates via turbo;
+      # this is all doable but feels like more effort than it's worth; the push itself would
+      # use global ActionCable methods anyway so it's not like it would be more ergonomic either
+      html = ApplicationController.render(
+        partial: "application/toast",
+        locals: {content: model.errors.full_messages.join(".\n")},
+      )
+      ImageChannel.broadcast_to(@participation, {html: {sel: "#toastContainer", where: "afterbegin", html: html}})
     end
 
     def broadcast_cmd(cmd)

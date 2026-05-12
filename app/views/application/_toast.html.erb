@@ -1,0 +1,10 @@
+<%# locals: (content: "Toast") %>
+
+<div data-controller="close" class="flex rounded-md p-2 m-2 <%= error_bg_classes %> w-xs">
+  <div class="flex-1">
+    <%= simple_format content %>
+  </div>
+  <a href="#" data-action="close#close:prevent">
+    <%= svg_icon "xmark" %>
+  </a>
+</div>

@@ -97,11 +97,8 @@ export class ServerRelay {
 
   handleData(data) {
     if(data.action !== "cmd") {
-      if(data.toast) {
-        let t = document.importNode(document.getElementById("toastTemplate").content, true).firstElementChild;
-        t.querySelector(".toastContent").textContent = data.toast;
-        document.querySelector("#toastContainer").prepend(t);
-      }
+      if(data.html)
+        document.querySelector(data.html.sel).insertAdjacentHTML(data.html.where ?? "beforeend", data.html.html);
 
       switch(data.action) {
       case "join":
