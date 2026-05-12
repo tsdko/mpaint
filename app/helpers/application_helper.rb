@@ -37,7 +37,7 @@ module ApplicationHelper
     data[:is_relative] = true if relative
 
     tag.time(datetime: datetime.rfc3339, data: data, title: sub, **options) do
-      main
+      main.to_s
     end
   end
 
