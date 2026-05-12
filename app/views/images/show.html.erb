@@ -2,7 +2,9 @@
 <% if authenticated? and @image.messageable_by? Current.user or @image.messages.any? %>
   <h3 class="text-2xl">Messages</h3>
 <% end %>
-<% if authenticated? and @image.messageable_by? Current.user %>
-  <%= render "messages/form", message: Message.new(target: @image) %>
+<%= turbo_frame_tag "messages" do %>
+  <% if authenticated? and @image.messageable_by? Current.user %>
+    <%= render "messages/form", message: Message.new(target: @image) %>
+  <% end %>
+  <%= render @image.messages %>
 <% end %>
-<%= render @image.messages %>

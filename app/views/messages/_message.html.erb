@@ -1,13 +1,15 @@
-<div class="flex rounded-md p-2 m-2 bg-neutral-300 dark:bg-neutral-500">
-  <div class="flex-1">
-    <%= render partial: "users/header", locals: {user: message.author} %>
-    <div><%= simple_format message.content %></div>
+<%= turbo_frame_tag dom_id(message) do %>
+  <div class="flex rounded-md p-2 m-2 bg-neutral-300 dark:bg-neutral-500">
+    <div class="flex-1">
+      <%= render partial: "users/header", locals: {user: message.author} %>
+      <div><%= simple_format message.content %></div>
+    </div>
+    <div>
+      <% if authenticated? and message.editable_by? Current.user %>
+        (<%= link_to "edit", edit_message_url(message), class: "text-accent-400 hover:text-accent-300" %>)
+      <% end %>
+      <% if local_assigns[:show_target] %>on <%= link_to message.target %>, <% end %>
+      <%= time_tag message.created_at %>
+    </div>
   </div>
-  <div>
-    <% if authenticated? and message.editable_by? Current.user %>
-      (<%= link_to "edit", edit_message_url(message), class: "text-accent-400 hover:text-accent-300" %>)
-    <% end %>
-    <% if local_assigns[:show_target] %>on <%= link_to message.target %>, <% end %>
-    <%= time_tag message.created_at %>
-  </div>
-</div>
+<% end %>

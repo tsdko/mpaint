@@ -14,8 +14,10 @@
   <% if authenticated? and @user.messageable_by? Current.user or @user.received_messages.any? %>
     <h3 class="text-2xl">Received Comments</h3>
   <% end %>
-  <% if authenticated? and @user.messageable_by? Current.user %>
-    <%= render "messages/form", message: Message.new(target: @user) %>
+  <%= turbo_frame_tag "received_messages" do %>
+    <% if authenticated? and @user.messageable_by? Current.user %>
+      <%= render "messages/form", message: Message.new(target: @user) %>
+    <% end %>
+    <%= render @user.recent_received_messages %>
   <% end %>
-  <%= render @user.recent_received_messages %>
 </div>
