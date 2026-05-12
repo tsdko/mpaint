@@ -1,0 +1,18 @@
+<%# locals: (participation: nil, pointer_id: nil, device: nil) %>
+
+<div id="cursor_<%= participation.id %>_<%= pointer_id %>"
+    class="hidden absolute pointer-events-none text-white">
+  <svg class="cursorPointer mix-blend-difference overflow-visible"
+      width="1" height="1" xmlns="http://www.w3.org/2000/svg">
+    <circle class="cursorCircle" stroke="currentColor" fill="none" r="7.5px" />
+    <path class="cursorCross" stroke="none" d="M-7 0H7ZM0-7V7Z" />
+  </svg>
+  <div class="ps-2">
+    <span class="mix-blend-difference">
+      <%= participation.display_name %>
+    </span>
+    <span class="userCursorDevice">
+      <%= device_symbol device %>
+    </span>
+  </div>
+</div>

@@ -3,13 +3,6 @@ import * as Util from "util";
 import * as Line from "line";
 
 class ParticipantCursorManager {
-  #DEVICE_SYMBOLS = {
-    touch: "☝️",
-    mouse: "🖱️",
-    pen: "🖊️",
-    unknown: "❓",
-  }
-
   constructor(canvas, participants) {
     this.canvas = canvas;
     this.participants = participants;
@@ -20,39 +13,15 @@ class ParticipantCursorManager {
     this.canvasMargins = {x: cr.left - ccr.left, y: cr.top - ccr.top};
   }
 
-  #getOrMakeElement(pid, poid) {
-    let cur = (this.userCursors[pid] ?? {})[poid];
-    if(cur)
-      return cur;
-
-    // get the root div so the reference is still alive after calling appendChild
-    cur = document.importNode(document.getElementById("userCursor").content, true)
-                .querySelector("div");
-    // unhide only after we have the position
-    cur.classList.add("hidden");
-    const participant = this.participants.get(pid);
-    let userName = participant?.name;
-    // TODO: ideally this suffix would get added for every non-unique user
-    // (track currently joined username counts, add to all if non-unique)
-    if(!participant?.id)
-      userName += `＃${pid}`;
-    cur.querySelector(".userCursorName").textContent = userName;
-    document.querySelector("#canvasContainer").appendChild(cur);
+  show(pid, poid, x, y) {
+    const cur = document.querySelector(`#cursor_${pid}_${poid}`);
+    if(!cur)
+      return;
     let curs = this.userCursors[pid];
     if(!curs)
       curs = this.userCursors[pid] = {};
     curs[poid] = cur;
     this.#brushUpdated(pid, poid);
-    return cur;
-  }
-
-  updateDevice(pid, poid, info) {
-    const dev = this.#DEVICE_SYMBOLS[info?.type] || this.#DEVICE_SYMBOLS.unknown;
-    this.#getOrMakeElement(pid, poid).querySelector(".userCursorDevice").textContent = dev;
-  }
-
-  show(pid, poid, x, y) {
-    const cur = this.#getOrMakeElement(pid, poid);
     cur.style.left = this.canvasMargins.x + x + "px";
     cur.style.top = this.canvasMargins.y + y + "px";
     cur.classList.remove("hidden");
@@ -113,9 +82,6 @@ export class ServerRelay {
     }
 
     switch(data.t) {
-    case "pinfo":
-      this.cursors.updateDevice(data.pid, data.pointer_id, {type: data.type});
-      break;
     case "pos":
       this.cursors.show(data.pid, data.pointer_id, data.x, data.y);
       break;

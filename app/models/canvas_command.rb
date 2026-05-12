@@ -76,6 +76,10 @@ module CanvasCommand
   class Pinfo < Base
     attr_accessor :pointer_id, :type
     validates :pointer_id, presence: true, exclusion: { in: [nil] }
+
+    def broadcast?
+      false
+    end
   end
 
   class Pos < Base

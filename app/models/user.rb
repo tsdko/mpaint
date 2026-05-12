@@ -50,6 +50,10 @@ class User < ApplicationRecord
     display_name
   end
 
+  def is_anonymous?
+    level == Level::ANONYMOUS
+  end
+
   def is_admin?
     level >= Level::ADMIN
   end

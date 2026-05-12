@@ -53,6 +53,14 @@ class ImageChannel < ApplicationCable::Channel
     c.cmds.each &method(:process_cmd)
   end
 
+  def cmd_pinfo(c)
+    html = ApplicationController.render(
+      partial: "images/cursor",
+      locals: {participation: @participation, pointer_id: c.pointer_id, device: c.type},
+    )
+    ImageChannel.broadcast_to(@image, {html: {sel: "#canvasContainer", html: html}})
+  end
+
   def cmd_line(c)
     @strokes[c.pointer_id].push_cmd(c)
   end

@@ -3,6 +3,19 @@ module ImagesHelper
     "inline-block md:block min-w-[2lh]"
   end
 
+  def device_symbol(device)
+    case device
+    when "touch"
+      "☝️"
+    when "mouse"
+      "🖱️"
+    when "pen"
+      "🖊️"
+    else
+      "❓"
+    end
+  end
+
   def canvas_tool_button(name, icon: "pencil", **options)
     tag.label(class: "#{check_button_classes} #{canvas_control_classes}") do
       concat tag.input(class: "hidden", name: "tool", type: "radio", value: name, data: {action: "canvas-tool#update"}, **options)
