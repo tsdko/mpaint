@@ -13,17 +13,21 @@ class Image::Participation < ApplicationRecord
     end
   end
 
+  def same_name_participants
+    if user.is_anonymous?
+      image.participations.where(open: true, user: nil)
+    else
+      User.joins(:image_participations)
+        .where(
+          display_name: user.display_name,
+          image_participations: {image_id: image.id, open: true},
+        ).distinct
+    end.count
+  end
+
   def display_name
     name = user.display_name
-    if user.is_anonymous?
-      # TODO: ideally apply this to non-unique non-anonymous users as well
-      #       (e.g. two different users on the same canvas with the same display name)
-      #       (GROUP BY user display name on active participations HAVING count(*) > 1;
-      #        unfortunately anons would have to have special handling anyway as their
-      #        display name is set in ruby)
-      name += "＃#{id}"
-    end
-
+    name += "＃#{id}" if same_name_participants > 1
     name
   end
 end
