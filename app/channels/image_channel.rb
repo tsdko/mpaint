@@ -41,12 +41,16 @@ class ImageChannel < ApplicationCable::Channel
     begin
       cmd = CanvasCommand::from_h data
     rescue ActiveModel::ValidationError => e
-      broadcast_errors e.model
+      broadcast_model_errors e.model
       return
     end
     return unless cmd.send?
 
-    process_cmd cmd
+    begin
+      process_cmd cmd
+    rescue ActiveRecord::StatementInvalid => e
+      broadcast_error e.to_s
+    end
   end
 
   def cmd_multi(c)
@@ -75,10 +79,18 @@ class ImageChannel < ApplicationCable::Channel
     @image.strokes << stroke
     @prev_brush = @brush
     @brush = {}
-    broadcast_errors stroke
+    broadcast_model_errors stroke
   end
 
   private
+    def self.toast_html_message(content)
+      html = ApplicationController.render(
+        partial: "application/toast",
+        locals: {content: content},
+      )
+      {html: {sel: "#toastContainer", where: "afterbegin", html: html}}
+    end
+
     def read_only?
       params[:read_only] or not @image.editable_by? Current.user
     end
@@ -93,20 +105,19 @@ class ImageChannel < ApplicationCable::Channel
       broadcast_cmd cmd if cmd.broadcast?
     end
 
-    def broadcast_errors(model)
+    def broadcast_model_errors(model)
       return if model.errors.empty?
+      broadcast_error model.errors.full_messages.join(".\n")
+    end
 
+    def broadcast_error(err)
       # we could use turbo streams instead but for that we'd have to make up
       # a participation-specific turbo stream source, make the client subscribe to it from js
       # (because we can't access the participation from the view as it's entirely handled here
       # (ideally its lifetime should be tied to the connection)), then push updates via turbo;
       # this is all doable but feels like more effort than it's worth; the push itself would
       # use global ActionCable methods anyway so it's not like it would be more ergonomic either
-      html = ApplicationController.render(
-        partial: "application/toast",
-        locals: {content: model.errors.full_messages.join(".\n")},
-      )
-      ImageChannel.broadcast_to(@participation, {html: {sel: "#toastContainer", where: "afterbegin", html: html}})
+      ImageChannel.broadcast_to(@participation, self.class.toast_html_message(err))
     end
 
     def broadcast_cmd(cmd)

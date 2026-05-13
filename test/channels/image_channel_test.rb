@@ -63,4 +63,31 @@ class ImageChannelTest < ActionCable::Channel::TestCase
 
     assert_equal [image_strokes(:one).data], image.strokes.map(&:data)
   end
+
+  test "drawing on a removed image generates error toasts" do
+    image = Image.create
+    user = users(:one)
+    stub_connection current_user: user
+    subscribe id: image.id
+
+    stroke_cmds = [
+      CanvasCommand::Line.new(pointer_id: 0, p1: {x: 1, y: 2}, p2: {x: 3, y: 4}),
+      CanvasCommand::Endstroke.new(pointer_id: 0),
+    ]
+    stroke_cmds.each do |cmd|
+      perform :cmd, cmd.to_h
+    end
+
+    participation = Image::Participation.where(image: image).first
+
+    image.destroy!
+
+    # XXX this error message is not very intuitive; also database-backend-dependent
+    expected_err = "SQLite3::ConstraintException: FOREIGN KEY constraint failed"
+    assert_broadcast_on(participation, ImageChannel::toast_html_message(expected_err)) do
+      stroke_cmds.each do |cmd|
+        perform :cmd, cmd.to_h
+      end
+    end
+  end
 end
