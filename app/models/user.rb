@@ -5,18 +5,14 @@ class User < ApplicationRecord
   has_many :sent_messages, class_name: "Message", foreign_key: "author_id"
   has_many :received_messages, class_name: "Message", as: :target, dependent: :destroy
 
+  MAX_NAME_LENGTH = 32
+
   module Level
     ANONYMOUS = 25
     USER = 50
     ADMIN = 1000
     MAX = 10000
   end
-
-  validates :display_name, length: { maximum: 32 }
-  validates :level, numericality: { in: Level::ANONYMOUS..Level::ADMIN }
-  normalizes :email_address, with: ->(e) { e.strip.downcase }
-
-  class PermissionError < StandardError; end
 
   class << self
     def anonymous
@@ -29,6 +25,16 @@ class User < ApplicationRecord
       [:email_address, :password_digest]
     end
   end
+
+  # validations are all down here due to references to stuff defined above
+  validates :display_name, exclusion: { in: [User::anonymous.display_name] }
+  validate :db_display_name_is_not_fallback_name
+  validates :display_name, format: { without: /\A\d/, message: "cannot start with an ASCII number" }
+  validates :display_name, length: { maximum: MAX_NAME_LENGTH }
+  validates :level, numericality: { in: Level::ANONYMOUS..Level::ADMIN }
+  normalizes :email_address, with: ->(e) { e.strip.downcase }
+
+  class PermissionError < StandardError; end
 
   def recent_image_participations
     image_participations
@@ -61,4 +67,13 @@ class User < ApplicationRecord
   def messageable_by?(user)
     user.level >= Level::USER
   end
+
+  private
+
+    def db_display_name_is_not_fallback_name
+      # XXX custom validation so we actually compare the underlying passed value instead of the fallback
+      if read_attribute(:display_name).match? /\Auser #/
+        errors.add(:display_name, 'cannot start with "user ##"')
+      end
+    end
 end
