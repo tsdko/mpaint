@@ -1,7 +1,12 @@
 <%# locals: (readonly: false) %>
 
 <h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
-<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]" data-controller="canvas-tool color-pick channel-canvas" data-action="canvas-tool:update->channel-canvas#changeTool">
+<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]"
+		<% unless readonly %>
+			data-controller="canvas-tool color-pick channel-canvas"
+			data-action="canvas-tool:update->channel-canvas#changeTool"
+		<% end %>
+	>
 	<% if readonly %>
 		<div class="mr-2">
 			<% if @image.editable_by? Current.user %>
