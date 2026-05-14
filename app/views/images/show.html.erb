@@ -1,4 +1,29 @@
-<%= render "canvas", readonly: true =%>
+<h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
+<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]">
+  <div class="mr-2">
+    <% if @image.editable_by? Current.user %>
+      <%= link_to "Edit", {id: @image, action: :edit}, class: "block #{button_classes}" %>
+    <% end %>
+    <% if @image.last_stroke %>
+      Last edited by
+        <%= link_to @image.last_stroke.participation.user || "名無し" %>
+        <%= time_tag @image.created_at + @image.last_stroke.created_at_delta_secs, relative: true %>
+    <% end %>
+  </div>
+  <%= render("canvas",
+    container_data: {
+      controller: "drag-scroll",
+      action: %w[
+        pointermove->drag-scroll#drag
+        pointerup->drag-scroll#resetXY
+        pointercancel->drag-scroll#resetXY
+        pointerout->drag-scroll#resetXY
+      ].join(" "),
+    },
+    canvas_data: {readonly: true, drag_scroll_target: "dataHolder"},
+  ) %>
+</div>
+
 <% if authenticated? and @image.messageable_by? Current.user or @image.messages.any? %>
   <h3 class="text-2xl">Messages</h3>
 <% end %>
@@ -8,3 +33,11 @@
   <% end %>
   <%= render @image.messages %>
 <% end %>
+
+<script>
+window.addEventListener("load", () => {
+  const options = {readonly: true};
+  ImageCanvas.setup(options);
+  ImageCanvas.connect(<%= @image.id %>, options);
+}, {once: true});
+</script>

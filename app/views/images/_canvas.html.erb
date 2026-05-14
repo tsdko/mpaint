@@ -1,90 +1,15 @@
-<%# locals: (readonly: false) %>
+<%# locals: (container_data: {}, canvas_data: {}) %>
 
-<h4 class="text-2xl font-bold col-start-2"><%= @image.title =%></h4>
-<div class="grid md:grid-cols-[auto_1fr] md:grid-rows-[auto_1fr]"
-		<% unless readonly %>
-			data-controller="canvas-tool color-pick channel-canvas"
-			data-action="canvas-tool:update->channel-canvas#changeTool"
-		<% end %>
-	>
-	<% if readonly %>
-		<div class="mr-2">
-			<% if @image.editable_by? Current.user %>
-				<%= link_to "Edit", {id: @image, action: :edit}, class: "block #{button_classes}" %>
-			<% end %>
-			<% if @image.last_stroke %>
-				Last edited by
-					<%= link_to @image.last_stroke.participation.user || "名無し" %>
-					<%= time_tag @image.created_at + @image.last_stroke.created_at_delta_secs, relative: true %>
-			<% end %>
-		</div>
-	<% else %>
-		<div id="canvasTools" class="mr-2 ml-2 whitespace-nowrap">
-			<fieldset>
-				<%= canvas_tool_button "brush", icon: "pencil" %>
-				<%= canvas_tool_button "eraser", icon: "eraser" %>
-				<%= canvas_tool_button "eyedropper", icon: "eye-dropper" %>
-				<%= canvas_tool_button "move", icon: "arrows-up-down-left-right" %>
-			</fieldset>
-			<div class="<%= canvas_control_classes %> max-w-[2lh] md:max-w-[initial] align-middle">
-				<input id="colorPicker" type="color" class="rounded-md w-full" data-color-pick-target="input" data-channel-canvas-target="colorPicker" data-action="change->channel-canvas#changeColor" />
-			</div>
-			<div class="relative openableContainer inline-block md:block ">
-				<a href="#" id="brushSizeButton" class="openableToggle <%= canvas_control_classes %> <%= button_classes %>"><canvas id="brushSizeCanvas" width="32" height="32" class="inline-block rounded-md"></canvas></a>
-				<div class="openable hidden block bg-neutral-300 dark:bg-neutral-500 p-2 rounded-md absolute z-1">
-					<input id="brushSize" min="1" max="100" value="1" type="range" data-action="change->channel-canvas#changeSize" />
-					<fieldset>
-						<label class="<%= check_button_classes %>">
-							<input class="hidden" name="brushAntialias" type="radio" value="false" checked data-action="channel-canvas#changeAntialias" />
-							<%= svg_icon "slash", class: "filter-(--no-antialias-filter)" %>
-						</label>
-						<label class="<%= check_button_classes %>">
-							<input class="hidden" name="brushAntialias" type="radio" value="true" data-action="channel-canvas#changeAntialias" />
-							<%= svg_icon "slash" %>
-						</label>
-					</fieldset>
-				</div>
-			</div>
-		</div>
-	<% end %>
-	<div id="canvasContainer"
-		class="p-2 relative touch-pinch-zoom overflow-auto max-h-[70vh]"
-		data-canvas-tool-target="canvasContainer"
-		data-controller="drag-scroll"
-		data-action="
-			pointermove->drag-scroll#drag
-			pointerup->drag-scroll#resetXY
-			pointercancel->drag-scroll#resetXY
-			pointerout->drag-scroll#resetXY
-		">
-		<canvas class="bg-checkerboard brightness-50" id="imageCanvas"
-			data-action="
-				pointerdown->color-pick#pick
-				pointermove->color-pick#pick
-				pointerup->color-pick#dispatchChange
-
-				<%# XXX is this really how you are supposed to use controllers?
-				        half of the required logic (which events to attach,
-				        what they correspond to) is in the html template %>
-				pointerenter->channel-canvas#sendPinfo
-				pointermove->channel-canvas#movePointer
-				pointerout->channel-canvas#hidePointer
-				pointerup->channel-canvas#endStroke
-				pointercancel->channel-canvas#endStroke
-			"
-			data-drag-scroll-target="dataHolder"
-			data-canvas-tool-target="canvas"
-			data-channel-canvas-target="canvas"
-			<% if readonly %>data-readonly="true"<% end %>
-			width="<%= @image.width =%>" height="<%= @image.height =%>">
-		</canvas>
-	</div>
-</div>
-
-<script>
-window.addEventListener("load", () => {
-	const options = {readonly: <%= readonly %>};
-	ImageCanvas.setup(options);
-	ImageCanvas.connect(<%= @image.id %>, options);
-}, {once: true});
-</script>
+<%= tag.div(
+      id: "canvasContainer",
+      class: "p-2 relative touch-pinch-zoom overflow-auto max-h-[70vh]",
+      data: container_data,
+  )  do %>
+  <%= tag.canvas(
+      id: "imageCanvas",
+      class: "bg-checkerboard brightness-50",
+      width: @image.width,
+      height: @image.height,
+      data: canvas_data,
+   ) %>
+<% end %>
