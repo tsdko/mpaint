@@ -27,7 +27,7 @@ class User < ApplicationRecord
   end
 
   # validations are all down here due to references to stuff defined above
-  validates :display_name, exclusion: { in: [User::anonymous.display_name] }
+  validates :display_name, exclusion: { in: [User.anonymous.display_name] }
   validate :db_display_name_is_not_fallback_name
   validates :display_name, format: { without: /\A\d/, message: "cannot start with an ASCII number" }
   validates :display_name, length: { maximum: MAX_NAME_LENGTH }

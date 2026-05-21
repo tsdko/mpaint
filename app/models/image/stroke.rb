@@ -23,14 +23,14 @@ class Image::Stroke < ApplicationRecord
   end
 
   private
-    STORED_CLASSES = CanvasCommand::all.filter do |cc|
+    STORED_CLASSES = CanvasCommand.all.filter do |cc|
       cc.respond_to? :stored_header and cc.respond_to? :stored_fields
     end.map do |cc|
       [cc.stored_header, cc]
     end.to_h
 
     def stored_from_cmd(cmd)
-      visit_field = -> (obj, fld) do
+      visit_field = ->(obj, fld) do
         fld = [fld] unless fld.is_a? Array
         return obj if fld.empty?
 
@@ -46,7 +46,7 @@ class Image::Stroke < ApplicationRecord
         h[k] = {}
       end
 
-      visit_field = -> (hsh, fld, data) do
+      visit_field = ->(hsh, fld, data) do
         fld = [fld] unless fld.is_a? Array
         if fld.length == 1
           hsh[fld[0]] = data
@@ -58,11 +58,10 @@ class Image::Stroke < ApplicationRecord
       cc = STORED_CLASSES[data[0]]
       raise "unsupported stored type #{data[0]}" if cc.nil?
       cc.stored_fields.each_with_index do |fpath, i|
-        visit_field.call( w, fpath, data[i+1] )
+        visit_field.call(w, fpath, data[i+1])
       end
 
       w[:t] = cc.cmd_type
       w
     end
 end
-

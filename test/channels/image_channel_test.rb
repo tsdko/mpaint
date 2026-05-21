@@ -84,7 +84,7 @@ class ImageChannelTest < ActionCable::Channel::TestCase
 
     # XXX this error message is not very intuitive; also database-backend-dependent
     expected_err = "SQLite3::ConstraintException: FOREIGN KEY constraint failed"
-    assert_broadcast_on(participation, ImageChannel::toast_html_message(expected_err)) do
+    assert_broadcast_on(participation, ImageChannel.toast_html_message(expected_err)) do
       stroke_cmds.each do |cmd|
         perform :cmd, cmd.to_h
       end

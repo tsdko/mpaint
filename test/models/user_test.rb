@@ -8,7 +8,7 @@ class UserTest < ActiveSupport::TestCase
 
   test "doesn't allow anonymous display name" do
     user = users(:one).dup
-    user.display_name = User::anonymous.display_name
+    user.display_name = User.anonymous.display_name
     assert_not user.valid?
   end
 

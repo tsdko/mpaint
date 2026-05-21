@@ -39,7 +39,7 @@ class ImageChannel < ApplicationCable::Channel
 
     data.delete("action")
     begin
-      cmd = CanvasCommand::from_h data
+      cmd = CanvasCommand.from_h data
     rescue ActiveModel::ValidationError => e
       broadcast_model_errors e.model
       return

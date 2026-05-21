@@ -1,5 +1,5 @@
 class Message < ApplicationRecord
-  belongs_to :author, :class_name => "User"
+  belongs_to :author, class_name: "User"
   belongs_to :target, polymorphic: true
 
   validate :allowed_by_target

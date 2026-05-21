@@ -5,7 +5,6 @@ class CreateImageStrokes < ActiveRecord::Migration[8.1]
       t.float :created_at_delta_secs
       t.string :connection_id
       t.json :data
-
     end
   end
 end

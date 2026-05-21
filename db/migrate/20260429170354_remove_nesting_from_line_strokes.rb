@@ -1,6 +1,6 @@
 class RemoveNestingFromLineStrokes < ActiveRecord::Migration[8.1]
   class Image::Stroke < ApplicationRecord; end
-  
+
   def change
     reversible do |direction|
       # this is likely slower than doing it directly via db sql (possible in sqlite and postgres at least)
