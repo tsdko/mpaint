@@ -1,5 +1,4 @@
 <div>
-  <h1 class="font-bold text-4xl">Messages#index</h1>
-  <p>Find me in app/views/messages/index.html.erb</p>
+  <h1 class="font-bold text-4xl">Messages</h1>
   <%= render @messages.order(created_at: :desc).limit(30), show_target: true %>
 </div>
