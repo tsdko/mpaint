@@ -7,4 +7,19 @@ class ApplicationController < ActionController::Base
   stale_when_importmap_changes
 
   default_form_builder ApplicationFormBuilder
+
+  rescue_from Exception, :with => :rescue_exception
+
+  private
+
+    def rescue_exception(exception)
+      case exception
+      when User::PermissionError
+        render "error", status: 403, locals: {message: "Access denied."}
+      when ActiveRecord::RecordNotFound
+        render "error", status: 404, locals: {message: "Not found."}
+      else
+        raise exception
+      end
+    end
 end
