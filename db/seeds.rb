@@ -7,3 +7,17 @@
 #   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
 #     MovieGenre.find_or_create_by!(name: genre_name)
 #   end
+
+(1..9).each do |i|
+  User.create_with(
+    password: "demopassword#{i}",
+    password_confirmation: "demopassword#{i}",
+    display_name: "Demo User #{i}",
+   ).find_or_create_by(email_address: "demo#{i}@localhost")
+end
+
+(1..2).each do |i|
+  Image.create_with(
+    min_edit_level: 9000,
+  ).find_or_create_by(title: "Empty Closed Image #{i}")
+end
