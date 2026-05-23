@@ -12,12 +12,14 @@ class ApplicationController < ActionController::Base
 
   private
 
+    def render_error(status, message: nil)
+      render("errors/generic", locals: {status: status, message: message})
+    end
+
     def rescue_exception(exception)
       case exception
       when User::PermissionError
-        render "error", status: 403, locals: {message: "Access denied."}
-      when ActiveRecord::RecordNotFound
-        render "error", status: 404, locals: {message: "Not found."}
+        render_error(403, message: "Insufficient permissions. Make sure you are logged into the right account.")
       else
         raise exception
       end

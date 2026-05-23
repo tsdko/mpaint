@@ -26,6 +26,7 @@ module Authentication
     end
 
     def find_session_by_cookie
+      return if request.key_generator.nil? # XXX key_generator is set to nil for exceptions_app requests
       Session.find_by(id: cookies.signed[:session_id]) if cookies.signed[:session_id]
     end
 
