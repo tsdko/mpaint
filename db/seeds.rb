@@ -21,3 +21,12 @@ end
     min_edit_level: 9000,
   ).find_or_create_by(title: "Empty Closed Image #{i}")
 end
+
+["User", "Image"].each do |target|
+  target.constantize.all.each do |tobj|
+    (1..2).each do |i|
+      Message.create_with(content: "Sample Message #{i}", author: User.find(2))
+        .find_or_create_by(target: tobj)
+    end
+  end
+end
