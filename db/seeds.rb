@@ -16,10 +16,11 @@
    ).find_or_create_by(email_address: "demo#{i}@localhost")
 end
 
+images = []
 (1..2).each do |i|
-  Image.create_with(
-    min_edit_level: 9000,
-  ).find_or_create_by(title: "Empty Closed Image #{i}")
+  images.push(Image.create_with(
+    min_edit_level: 25,
+  ).find_or_create_by(title: "Empty Closed Image #{i}"))
 end
 
 ["User", "Image"].each do |target|
@@ -29,4 +30,8 @@ end
         .find_or_create_by(target: tobj)
     end
   end
+end
+
+images.each do |img|
+  img.update(min_edit_level: 9000)
 end
